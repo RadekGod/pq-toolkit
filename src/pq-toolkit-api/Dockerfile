@@ -7,7 +7,7 @@ WORKDIR /app/
 ENV PYTHONPATH=/app
 ARG ENVIRONMENT=production
 
-COPY pyproject.toml poetry.lock ./
+COPY . .
 
 RUN POETRY_VIRTUALENVS_CREATE=false poetry install $(test "$ENVIRONMENT" == production && echo "--only=main") --no-interaction --no-ansi
 
