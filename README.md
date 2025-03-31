@@ -20,7 +20,7 @@ Project members:
    - Kondracki Wojciech
    - Krzysztof Miśków
 - WIMU 25L course members:
-   - KInga Hacaś
+   - Kinga Hacaś
    - Radosław Goglewski
    - Aleksander Bujnowski
 
