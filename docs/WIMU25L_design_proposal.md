@@ -23,7 +23,7 @@ In the later phases of the project, the focus will be on improving the user inte
 
 - Enhancing the presentation of results, including adding visualizations and user feedback.
 
-All activities aim to increase the usability, reliability, and scalability of the tool — by improving error handling in the UI, preparing comprehensive user documentation, gathering and integrating user feedback and introducing CI/CD pipelines — while facilitating its further development and maintenance.
+All activities aim to increase the usability, stability, and scalability of the tool while facilitating its further development and maintenance.
 
 # Technology Stack
 
@@ -81,7 +81,6 @@ All activities aim to increase the usability, reliability, and scalability of th
 ## 14.04 - 20.04:
 - ### Improvement of the experiment generation system
 - ### Addition of user instructions (test execution guide)
-- ### Scientific paper draft
 - ### Easter break
 
 ## 21.04 - 27.04:
