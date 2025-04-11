@@ -15,10 +15,10 @@ const Home = (): JSX.Element => {
         <div className="relative text-center mb-sm md:mb-md lg:mb-lg">
           <Blobs />
           <div className="fadeInUp">
-            <h1 className="relative text-5xl md:text-6xl font-bold">
+            <h1 className="relative text-5xl md:text-6xl font-bold dark:text-white">
               Perceptual Qualities Toolkit
             </h1>
-            <h2 className="relative text-lg md:text-xl font-semibold mt-sm">
+            <h2 className="relative text-lg md:text-xl font-semibold mt-sm dark:text-white">
               Home page of experiment UI for Perceptual Qualities Python Toolkit
             </h2>
           </div>
@@ -61,7 +61,7 @@ const ExperimentsListWidget = (): JSX.Element => {
 
   return (
     <div className="flex flex-col items-center fadeInUp z-10 w-full max-w-2xl mx-auto bg-white/10 dark:bg-gray-800/10 backdrop-blur-md rounded-3xl p-8 shadow-2xl">
-      <div className="font-bold text-xl md:text-2xl mb-10">
+      <div className="font-bold text-xl md:text-2xl mb-10 dark:text-white">
         Configured Experiments
       </div>
       <ul className="space-y-2 w-full">

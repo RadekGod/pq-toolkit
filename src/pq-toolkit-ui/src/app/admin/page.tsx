@@ -63,10 +63,10 @@ const AdminPage = ({
         <div className="relative text-center mb-sm md:mb-md lg:mb-lg">
           <Blobs />
           <div className="fadeInUp">
-            <h1 className="relative text-5xl md:text-6xl font-bold">
+            <h1 className="relative text-5xl md:text-6xl font-bold dark:text-white">
               Perceptual Qualities Toolkit
             </h1>
-            <h2 className="relative text-2xl md:text-3xl font-semibold mt-sm">
+            <h2 className="relative text-2xl md:text-3xl font-semibold mt-sm dark:text-white">
               Experiment Configurator
             </h2>
           </div>
