@@ -21,7 +21,7 @@ Project members:
    - Krzysztof Miśków
 - WIMU 25L course members:
    - Kinga Hacaś
-   - Radosław Goglewski
+   - Radosław Godlewski
    - Aleksander Bujnowski
 
 ## Project structure

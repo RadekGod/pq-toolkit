@@ -18,6 +18,7 @@ import { FaExpand, FaMinus, FaPlus } from 'react-icons/fa'
 import CreateExperimentForm from '@/lib/components/form/createExperimentForm'
 import DeleteButton from '@/lib/components/basic/deleteButton'
 import { TbLogout2 } from 'react-icons/tb'
+
 const AdminPage = ({
   refreshAdminPage
 }: {
@@ -58,28 +59,14 @@ const AdminPage = ({
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-stone-900">
       <Header />
-      <div className="flex justify-end fadeInUp mr-4 md:mr-10 z-50">
-        <button
-          className="flex items-center font-semibold max-md:text-sm max-md:px-2 max-md:py-1 bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 text-white px-4 py-2 rounded-full shadow-lg transform transition-transform duration-300 ease-in-out hover:scale-105"
-          onClick={() => {
-            localStorage.removeItem('token')
-            refreshAdminPage().catch((error) => {
-              console.error(error)
-            })
-          }}
-        >
-          <TbLogout2 className="mr-2" />
-          Logout
-        </button>
-      </div>
       <div className="flex flex-col h-full w-full items-center justify-center my-auto mt-32">
         <div className="relative text-center mb-sm md:mb-md lg:mb-lg">
           <Blobs />
           <div className="fadeInUp">
-            <h1 className="relative text-5xl md:text-6xl font-bold">
+            <h1 className="relative text-5xl md:text-6xl font-bold dark:text-white">
               Perceptual Qualities Toolkit
             </h1>
-            <h2 className="relative text-2xl md:text-3xl font-semibold mt-sm">
+            <h2 className="relative text-2xl md:text-3xl font-semibold mt-sm dark:text-white">
               Experiment Configurator
             </h2>
           </div>
