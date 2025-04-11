@@ -18,7 +18,7 @@ const FinishPage = ({ params }: { params: { name: string } }): JSX.Element => {
     <div className="min-h-screen bg-gray-100 dark:bg-stone-900">
       <Header />
       <div className="flex flex-col h-full w-full items-center justify-center my-auto mt-40">
-        <div className="relative text-center mb-sm">
+        <div className="relative text-center mb-sm dark:text-white">
           <Blobs />
           <div className="fadeInUp">
             <h1 className="relative text-5xl md:text-6xl font-bold">
