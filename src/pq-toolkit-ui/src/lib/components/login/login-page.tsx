@@ -52,7 +52,7 @@ const LoginPage = ({
       <div className="flex flex-col h-full w-full items-center justify-center my-auto mt-40">
         <div className="relative text-center mb-sm">
           <Blobs />
-          <div className="fadeInUp">
+          <div className="fadeInUp dark:text-white">
             <h1 className="relative text-5xl md:text-6xl font-bold">
               Perceptual Qualities Toolkit
             </h1>
