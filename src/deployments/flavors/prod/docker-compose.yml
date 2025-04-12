@@ -30,7 +30,7 @@ services:
 
   # FastAPI backend
   pq-toolkit-api:
-    build: ../pq-toolkit-api
+    build: ../../../pq-toolkit-api
     depends_on:
       pq-toolkit-db:
         condition: service_healthy
@@ -47,13 +47,13 @@ services:
       MINIO_ENDPOINT: pq-sample-storage-minio
       MINIO_STORAGE_USE_HTTPS: $MINIO_STORAGE_USE_HTTPS
       PQ_API_PORT: $PQ_API_PORT
-      ENVIRONMENT: staging
+      ENVIRONMENT: production
     command: sh -c "./prestart.sh && python3 main.py"
 
   # Frontend
   pq-toolkit-ui:
     build:
-      context: ../pq-toolkit-ui
+      context: ../../../pq-toolkit-ui
       dockerfile: Dockerfile.dev
       args:
         NEXT_PUBLIC_API_URL: "htshts"
@@ -77,7 +77,7 @@ services:
   # Gateway
   pq-gateway:
     build:
-      context: pq-gateway
+      context: ../../pq-gateway
       dockerfile: Dockerfile
     ports:
       - $GATEWAY_PORT:$GATEWAY_PORT
@@ -90,3 +90,4 @@ services:
       PQ_UI_SERVER: $PQ_UI_SERVER
       PQ_UI_PORT: $PQ_UI_PORT
       GATEWAY_PORT: $GATEWAY_PORT
+
