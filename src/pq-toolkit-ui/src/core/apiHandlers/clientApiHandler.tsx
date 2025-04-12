@@ -1,13 +1,9 @@
 'use client';
 import { SWRConfig } from 'swr';
 import { type z } from 'zod';
+import { type APIError, type APIResult } from '@/types/api';
 
-interface APIError {
-  msg: string
-  status: number
-}
-
-const fetcher = async (url: RequestInfo | URL): Promise<unknown> => {
+const fetcher = async <T,>(url: RequestInfo | URL): Promise<T> => {
   const res = await fetch(url, {
     headers: {
       accept: 'application/json',
@@ -37,10 +33,14 @@ export const SWRConfigProvider = ({
 export const validateApiData = <T,>(
   data: unknown,
   schema: z.Schema<T>
-):
-  | { data: T; validationError: null }
-  | { data: null; validationError: string } => {
+): APIResult<T> => {
   const parsed = schema.safeParse(data);
-  if (parsed.success) return { data: parsed.data, validationError: null };
-  return { data: null, validationError: parsed.error.message };
+  if (parsed.success) return { data: parsed.data, error: null };
+  return { 
+    data: null, 
+    error: { 
+      msg: parsed.error.message,
+      status: 400
+    } 
+  };
 };

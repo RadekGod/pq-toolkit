@@ -1,7 +1,11 @@
-import React, {useState, useEffect} from 'react';
+"use client";
+
+import React, {useState, useEffect, useCallback} from 'react';
 import useSWR from 'swr';
 import {fetchSamples} from '@/lib/utils/fetchers';
 import AudioPlayer from '@/lib/components/player/audioplayer';
+import { FaCloudUploadAlt, FaMusic } from 'react-icons/fa';
+import { useToast, ToastType } from '@/lib/contexts/ToastContext';
 
 interface SampleData {
     sampleId: number;
@@ -21,6 +25,8 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
     const [sortedSamples, setSortedSamples] = useState<SampleData[]>([]);
     const [selectedSamples, setSelectedSamples] = useState<number[]>([]);
     const [uploadedSamples, setUploadedSamples] = useState<{ name: string; assetPath: string | File }[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const { addToast } = useToast();
 
     useEffect(() => {
         if (apiData?.samples) {
@@ -41,15 +47,42 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
         );
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, sampleName: string): void => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setUploadedSamples((prev) => [
-                ...prev,
-                {name: sampleName || file.name, assetPath: file},
-            ]);
+    const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    }, []);
+
+    const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    }, []);
+
+    const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    }, []);
+
+    const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const files = Array.from(e.dataTransfer.files);
+        const audioFiles = files.filter(file => file.type.startsWith('audio/'));
+        
+        if (audioFiles.length > 0) {
+            const newSamples = audioFiles.map((file) => ({
+                name: file.name,
+                assetPath: file,
+            }));
+            setUploadedSamples((prev) => [...prev, ...newSamples]);
+            addToast(`Successfully added ${audioFiles.length} audio file(s)`, ToastType.SUCCESS);
+        } else if (files.length > 0) {
+            addToast('Please drop only audio files', ToastType.WARNING);
         }
-    };
+    }, [addToast]);
 
     const handleSubmitSamples = async (): Promise<void> => {
         try {
@@ -85,10 +118,12 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
                 assetPath: path,
             }));
 
+            addToast('Samples uploaded successfully!', ToastType.SUCCESS);
             onSamplesSubmitted(newSamples);
             onClose();
         } catch (error) {
             console.error('Error submitting samples:', error);
+            addToast(error instanceof Error ? error.message : 'Failed to upload samples', ToastType.ERROR);
         }
     };
 
@@ -113,7 +148,7 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
                                 className="flex items-center justify-between bg-white/90 dark:bg-black/50 p-3 rounded-md shadow-sm"
                             >
                                 <span className="text-sm font-medium text-gray-900 dark:text-white w-2/3">
-                                    {sample.name} {/* Wyświetlamy nazwę pliku */}
+                                    {sample.name}
                                 </span>
                                 <audio controls className="w-1/3">
                                     <source
@@ -124,23 +159,48 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
                                 </audio>
                             </div>
                         ))}
-                        <div className="flex flex-col space-y-2">
-                            <input
-                                type="file"
-                                accept="audio/mpeg"
-                                multiple
-                                onChange={(e) => {
-                                    const files = e.target.files;
-                                    if (files) {
-                                        const newSamples = Array.from(files).map((file) => ({
-                                            name: file.name,
-                                            assetPath: file,
-                                        }));
-                                        setUploadedSamples((prev) => [...prev, ...newSamples]);
-                                    }
-                                }}
-                                className="py-3 px-6 w-full border border-gray-300 rounded-md dark:bg-black/50 dark:text-white"
-                            />
+                        <div
+                            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 transition-colors duration-200 ${
+                                isDragging
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                    : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500'
+                            }`}
+                            onDragEnter={handleDragEnter}
+                            onDragLeave={handleDragLeave}
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                        >
+                            <FaCloudUploadAlt className={`w-12 h-12 mb-4 ${
+                                isDragging ? 'text-blue-500' : 'text-gray-400'
+                            }`} />
+                            <p className="text-lg font-medium text-center mb-2 dark:text-white">
+                                {isDragging ? 'Drop audio files here' : 'Drag & drop audio files here'}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                                or
+                            </p>
+                            <label className="cursor-pointer">
+                                <input
+                                    type="file"
+                                    accept="audio/*"
+                                    multiple
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        const files = e.target.files;
+                                        if (files) {
+                                            const newSamples = Array.from(files).map((file) => ({
+                                                name: file.name,
+                                                assetPath: file,
+                                            }));
+                                            setUploadedSamples((prev) => [...prev, ...newSamples]);
+                                        }
+                                    }}
+                                />
+                                <span className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+                                    <FaMusic className="mr-2" />
+                                    Browse Audio Files
+                                </span>
+                            </label>
                         </div>
                     </div>
                     <button

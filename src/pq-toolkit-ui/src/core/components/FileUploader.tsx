@@ -4,9 +4,16 @@ import { FaCheckCircle, FaFile, FaFileExport } from 'react-icons/fa';
 import { IoMdCloseCircle } from 'react-icons/io';
 import axios from 'axios';
 
+enum UploadStatus {
+  Created = 'created',
+  Uploading = 'uploading',
+  Uploaded = 'uploaded',
+  Error = 'error'
+}
+
 interface BaseFileUploaderProps {
   url: string
-  onFileUploaded: ((arg0: boolean) => void) | ((arg0: boolean) => Promise<void>)
+  onFileUploaded: (success: boolean) => void | Promise<void>
   filetypes?: string
   className?: string
   multi?: boolean
@@ -19,6 +26,12 @@ interface FileUploaderSingleProps extends BaseFileUploaderProps {
 
 interface FileUploaderMultiProps extends BaseFileUploaderProps {
   multi: true
+}
+
+interface FileRecordProps {
+  url: string
+  file: File
+  completeCallback: (success: boolean) => Promise<void>
 }
 
 /**
@@ -141,19 +154,13 @@ const FileRecord = ({
   url,
   file,
   completeCallback
-}: {
-  url: string
-  file: File
-  completeCallback: (arg0: boolean) => Promise<void>
-}): JSX.Element => {
-  const [status, setStatus] = useState<
-    'created' | 'uploading' | 'uploaded' | 'error'
-  >('created');
+}: FileRecordProps): JSX.Element => {
+  const [status, setStatus] = useState<UploadStatus>(UploadStatus.Created);
   const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
     function upload(): void {
-      setStatus('uploading');
+      setStatus(UploadStatus.Uploading);
       const formData = new FormData();
       formData.append('file', file);
 
@@ -168,17 +175,17 @@ const FileRecord = ({
         })
         .then(async (response) => {
           setProgress(100);
-          setStatus('uploaded');
+          setStatus(UploadStatus.Uploaded);
           await completeCallback(true);
         })
         .catch(async (error) => {
-          setStatus('error');
+          setStatus(UploadStatus.Error);
           await completeCallback(false);
           console.error(error);
         });
     }
 
-    if (status === 'created') {
+    if (status === UploadStatus.Created) {
       upload();
     }
   }, [completeCallback, file, status, url]);
@@ -198,17 +205,17 @@ const FileRecord = ({
         {file.name} ({formatSize(file.size)})
       </div>
       <div className="flex items-center basis-1/2">
-        {status === 'uploading' ? (
+        {status === UploadStatus.Uploading ? (
           <LinearProgress
             variant="determinate"
             value={progress}
             className="w-full rounded-full"
           />
         ) : null}
-        {status === 'uploaded' ? (
+        {status === UploadStatus.Uploaded ? (
           <FaCheckCircle className="stroke-primary fill-primary ml-auto" />
         ) : null}
-        {status === 'error' ? (
+        {status === UploadStatus.Error ? (
           <div className="ml-auto flex items-center gap-xs">
             Error
             <IoMdCloseCircle className="stroke-red-500 fill-red-500 h-sm w-sm" />

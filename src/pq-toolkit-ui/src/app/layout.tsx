@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
 import { SWRConfigProvider } from '@/core/apiHandlers/clientApiHandler';
 import { Providers } from './providers';
+import { ToastProvider } from '@/lib/contexts/ToastContext';
+import ToastContainer from '@/lib/components/shared/ToastContainer';
 
 const inter = Inter({ subsets: ['latin-ext'] });
 
@@ -22,11 +24,14 @@ const RootLayout = ({
         <link rel="icon" href="/logo.svg" />
       </head>
       <body className={inter.className}>
-        <Providers>
-          <SWRConfigProvider>
-            <div>{children}</div>
-          </SWRConfigProvider>
-        </Providers>
+        <ToastProvider>
+          <Providers>
+            <SWRConfigProvider>
+              <div>{children}</div>
+            </SWRConfigProvider>
+          </Providers>
+          <ToastContainer />
+        </ToastProvider>
       </body>
     </html>
   );
