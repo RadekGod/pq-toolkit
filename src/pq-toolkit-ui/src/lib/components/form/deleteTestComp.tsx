@@ -1,13 +1,5 @@
-import React, { useState } from 'react'
-import { FaCheck, FaTrash, FaTimes } from 'react-icons/fa'
-import {
-  type ABTest,
-  type ABXTest,
-  type FullABXTest,
-  type MUSHRATest,
-  type APETest,
-  type BaseTest
-} from '@/lib/schemas/experimentSetup'
+import React, { useState } from 'react';
+import { FaCheck, FaTrash, FaTimes } from 'react-icons/fa';
 
 interface DeleteTestCompProps {
   index: number
@@ -17,27 +9,27 @@ interface DeleteTestCompProps {
 }
 
 const DeleteTestComp = (props: DeleteTestCompProps): JSX.Element => {
-  const [deleteConfirm, setDeleteConfirm] = useState<boolean>(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<boolean>(false);
 
   // Funkcja do usuwania testu z eksperymentu
-  const deleteTest = async () => {
+  const deleteTest = async (): Promise<void> => {
     try {
       const response = await fetch(`/api/v1/experiments/${props.experimentName}/tests/${props.experimentDetails.tests[props.index].testId}`, {
         method: 'DELETE',
-      })
+      });
       if (!response.ok) {
-        throw new Error(`Failed to delete test`)
+        throw new Error(`Failed to delete test`);
       }
 
       // Aktualizowanie lokalnego stanu, aby usunąć test z UI
       props.setExperimentDetails((prevDetails: any) => ({
         ...prevDetails,
         tests: prevDetails.tests.filter((_: any, i: number) => i !== props.index)
-      }))
+      }));
     } catch (err) {
-      console.error("Error deleting test:", err)
+      console.error("Error deleting test:", err);
     }
-  }
+  };
 
   return (
     <div>
@@ -48,7 +40,7 @@ const DeleteTestComp = (props: DeleteTestCompProps): JSX.Element => {
             className="fill-red-500 mr-2 cursor-pointer transform hover:scale-125 duration-300 ease-in-out"
             size={25}
             onClick={() => {
-              setDeleteConfirm(false)
+              setDeleteConfirm(false);
             }}
           />
           <FaCheck
@@ -56,8 +48,8 @@ const DeleteTestComp = (props: DeleteTestCompProps): JSX.Element => {
             className="fill-green-500 cursor-pointer transform hover:scale-125 duration-300 ease-in-out"
             size={24}
             onClick={() => {
-              setDeleteConfirm(false)
-              deleteTest()
+              setDeleteConfirm(false);
+              deleteTest();
             }}
           />
         </div>
@@ -67,12 +59,12 @@ const DeleteTestComp = (props: DeleteTestCompProps): JSX.Element => {
           className="fill-red-500 cursor-pointer mr-0 sm:mr-2 transform hover:scale-125 duration-300 ease-in-out"
           size={25}
           onClick={() => {
-            setDeleteConfirm(true)
+            setDeleteConfirm(true);
           }}
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default DeleteTestComp
+export default DeleteTestComp;

@@ -7,10 +7,10 @@ import {
   type ExperimentSetup,
   type FullABXTest,
   type MUSHRATest
-} from '@/lib/schemas/experimentSetup'
-import { useState } from 'react'
-import { FaPlus } from 'react-icons/fa'
-import DeleteAxisComp from '../form/deleteAxisComp'
+} from '@/lib/schemas/experimentSetup';
+import { useState } from 'react';
+import { FaPlus } from 'react-icons/fa';
+import DeleteAxisComp from '../form/deleteAxisComp';
 
 const ApeEditor = ({
   currentTest,
@@ -27,8 +27,8 @@ const ApeEditor = ({
   fileList: string[]
   setSetup: React.Dispatch<React.SetStateAction<ExperimentSetup>>
 }): JSX.Element => {
-  const [newQuestion, setNewQuestion] = useState('')
-  const [sampleTest, setSampleTest] = useState<Sample[]>(currentTest.samples)
+  const [newQuestion, setNewQuestion] = useState('');
+  const [sampleTest, setSampleTest] = useState<Sample[]>(currentTest.samples);
   return (
     <div className="w-full">
       <h4 className="font-semibold text-sm lg:text-base mb-1 mt-3">Samples</h4>
@@ -56,17 +56,17 @@ const ApeEditor = ({
                       setSampleTest((oldarray) => [
                         ...oldarray,
                         { sampleId: assetPath, assetPath: assetPath }
-                      ])
+                      ]);
                     } else {
                       const foundJSON = sampleTest.find(
                         (item) => item.assetPath === assetPath
-                      )
+                      );
                       if (foundJSON !== undefined) {
                         setSampleTest((oldarray) =>
                           oldarray.filter(
                             (sample) => sample.assetPath !== assetPath
                           )
-                        )
+                        );
                       }
                     }
                   }}
@@ -114,7 +114,7 @@ const ApeEditor = ({
           className="rounded outline-0 border-2 bg-gray-50 border-gray-300 dark:bg-gray-800 dark:border-gray-500 text-black dark:text-white w-full"
           value={newQuestion}
           onChange={(e) => {
-            setNewQuestion(e.target.value)
+            setNewQuestion(e.target.value);
           }}
         />
         <button
@@ -129,14 +129,14 @@ const ApeEditor = ({
                     text: newQuestion
                   }
                 ]
-              })
+              });
             } else {
               setCurrentTest({
                 ...currentTest,
                 axis: [{ questionId: newQuestion, text: newQuestion }]
-              })
+              });
             }
-            setNewQuestion('')
+            setNewQuestion('');
           }}
           disabled={
             newQuestion.length === 0 ||
@@ -176,12 +176,12 @@ const ApeEditor = ({
                 .filter((test) => test.testNumber !== currentTest.testNumber)
                 .map((test) => {
                   if (test.testNumber > currentTest.testNumber) {
-                    return { ...test, testNumber: test.testNumber - 1 }
+                    return { ...test, testNumber: test.testNumber - 1 };
                   }
-                  return test
+                  return test;
                 })
-            }))
-            setCurrentTest((oldTest) => ({ ...oldTest, testNumber: -1 }))
+            }));
+            setCurrentTest((oldTest) => ({ ...oldTest, testNumber: -1 }));
           }}
         >
           Delete
@@ -192,16 +192,16 @@ const ApeEditor = ({
             const updatedTest = {
               ...currentTest,
               samples: sampleTest
-            }
+            };
 
             if ('questions' in updatedTest) {
-              delete updatedTest.questions
+              delete updatedTest.questions;
             }
             if ('anchors' in updatedTest) {
-              delete updatedTest.anchors
+              delete updatedTest.anchors;
             }
             if ('reference' in updatedTest) {
-              delete updatedTest.reference
+              delete updatedTest.reference;
             }
 
             setSetup((oldSetup) => ({
@@ -209,15 +209,15 @@ const ApeEditor = ({
               tests: oldSetup.tests.map((test) =>
                 test.testNumber === updatedTest.testNumber ? updatedTest : test
               )
-            }))
+            }));
 
-            setCurrentTest(updatedTest)
+            setCurrentTest(updatedTest);
           }}
         >
           Save
         </button>
       </div>
     </div>
-  )
-}
-export default ApeEditor
+  );
+};
+export default ApeEditor;

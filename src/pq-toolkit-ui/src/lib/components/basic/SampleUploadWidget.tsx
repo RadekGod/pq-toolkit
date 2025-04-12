@@ -33,7 +33,7 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
         }
     }, [apiData]);
 
-    const handleSampleToggle = (sampleId: number) => {
+    const handleSampleToggle = (sampleId: number): void => {
         setSelectedSamples((prev) =>
             prev.includes(sampleId)
                 ? prev.filter((id) => id !== sampleId)
@@ -41,7 +41,7 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
         );
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, sampleName: string) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, sampleName: string): void => {
         const file = e.target.files?.[0];
         if (file) {
             setUploadedSamples((prev) => [
@@ -51,7 +51,7 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
         }
     };
 
-    const handleSubmitSamples = async () => {
+    const handleSubmitSamples = async (): Promise<void> => {
         try {
             const formData = new FormData();
 
@@ -173,12 +173,12 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
                                         {sample.name.split('/').pop()}
                                     </span>
                                         <span className="text-sm text-gray-500 dark:text-gray-400">
-                                        {sample.rating?.toFixed(1) || 'N/A'} ★
+                                        {sample.rating?.toFixed(1) ?? 'N/A'} ★
                                     </span>
                                     </div>
                                     <AudioPlayer assetPath={sample.assetPath}/>
                                     <button
-                                        onClick={() => handleSampleToggle(sample.sampleId)}
+                                        onClick={() => {handleSampleToggle(sample.sampleId);}}
                                         className={`ml-4 px-4 py-2 rounded ${
                                             selectedSamples.includes(sample.sampleId)
                                                 ? 'bg-red-500 text-white'

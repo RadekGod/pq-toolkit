@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, {useState} from 'react';
 import useSWR, {type KeyedMutator} from 'swr';
 import Loading from '../../loading';

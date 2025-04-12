@@ -12,7 +12,7 @@ const Header = (props: any): JSX.Element => {
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const {data: userData, error} = useSWR('/api/v1/auth/user', userFetch);
-    const isLoggedIn = userData?.is_active ?? false;
+    const isLoggedIn: boolean = userData?.is_active ?? false;
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -92,7 +92,7 @@ const Header = (props: any): JSX.Element => {
                         <div className="relative" ref={dropdownRef}>
                             <button
                                 className="text-blue-400 dark:text-blue-500 hover:text-pink-500 dark:hover:text-pink-600 transform hover:scale-105 duration-300 ease-in-out h-10 w-10 mx-2 flex items-center justify-center"
-                                onClick={() => setDropdownOpen(!dropdownOpen)}
+                                onClick={() => {setDropdownOpen(!dropdownOpen);}}
                             >
                                 <HiMenu className="h-10 w-10"/>
                             </button>

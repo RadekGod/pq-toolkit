@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react'
-import { LinearProgress } from '@mui/material'
-import { FaCheckCircle, FaFile, FaFileExport } from 'react-icons/fa'
-import { IoMdCloseCircle } from 'react-icons/io'
-import axios from 'axios'
+import React, { useState, useEffect } from 'react';
+import { LinearProgress } from '@mui/material';
+import { FaCheckCircle, FaFile, FaFileExport } from 'react-icons/fa';
+import { IoMdCloseCircle } from 'react-icons/io';
+import axios from 'axios';
 
 interface BaseFileUploaderProps {
   url: string
@@ -40,43 +40,45 @@ const FileUploader = ({
   onFileUploaded,
   dataKey
 }: FileUploaderSingleProps | FileUploaderMultiProps): JSX.Element => {
-  if (filetypes == null) filetypes = '*/*'
+  if (filetypes == null) {
+    filetypes = '*/*';
+  }
 
-  const [fileList, setFileList] = useState<File[] | null>(null)
-  const [uploadCounter, setUploadCounter] = useState(0)
-  const [shouldHighlight, setShouldHighlight] = useState(false)
+  const [fileList, setFileList] = useState<File[] | null>(null);
+  const [uploadCounter, setUploadCounter] = useState(0);
+  const [shouldHighlight, setShouldHighlight] = useState(false);
 
   const preventDefaultHandler = (e: React.DragEvent<HTMLElement>): void => {
-    e.preventDefault()
-    e.stopPropagation()
-  }
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   const selectFilesHandler = (
     event: React.ChangeEvent<HTMLInputElement>
   ): void => {
-    const fileList = event.target.files
+    const fileList = event.target.files;
     if (fileList != null) {
-      const files: File[] | null = new Array<File>()
+      const files: File[] | null = new Array<File>();
       for (let i = 0; i < fileList.length; i++) {
         if (fileList.item(i) != null) {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          files[i] = fileList.item(i)!
+          files[i] = fileList.item(i)!;
         }
       }
-      setUploadCounter((prev) => prev + 1)
-      setFileList(files)
+      setUploadCounter((prev) => prev + 1);
+      setFileList(files);
     }
-  }
+  };
 
   const dropFilesHandler = (e: React.DragEvent<HTMLElement>): void => {
-    preventDefaultHandler(e)
-    let files
-    if (multi === true) files = Array.from(e.dataTransfer.files)
-    else files = [e.dataTransfer.files[0]]
-    setUploadCounter((prev) => prev + 1)
-    setFileList(files)
-    setShouldHighlight(false)
-  }
+    preventDefaultHandler(e);
+    let files;
+    if (multi === true) files = Array.from(e.dataTransfer.files);
+    else files = [e.dataTransfer.files[0]];
+    setUploadCounter((prev) => prev + 1);
+    setFileList(files);
+    setShouldHighlight(false);
+  };
 
   return (
     <div className={`flex w-full z-20 ${className ?? ''}`}>
@@ -88,16 +90,16 @@ const FileUploader = ({
             : 'border-gray-100 hover:border-primary-500 border-dashed'
         } rounded-sm w-full flex text-white cursor-pointer`}
         onDragOver={(e) => {
-          preventDefaultHandler(e)
-          setShouldHighlight(true)
+          preventDefaultHandler(e);
+          setShouldHighlight(true);
         }}
         onDragEnter={(e) => {
-          preventDefaultHandler(e)
-          setShouldHighlight(true)
+          preventDefaultHandler(e);
+          setShouldHighlight(true);
         }}
         onDragLeave={(e) => {
-          preventDefaultHandler(e)
-          setShouldHighlight(false)
+          preventDefaultHandler(e);
+          setShouldHighlight(false);
         }}
         onDrop={dropFilesHandler}
       >
@@ -116,7 +118,7 @@ const FileUploader = ({
                 url={url}
                 file={file}
                 completeCallback={async (success: boolean) => {
-                  await onFileUploaded(success)
+                  await onFileUploaded(success);
                 }}
               />
             ))}
@@ -132,8 +134,8 @@ const FileUploader = ({
         />
       </label>
     </div>
-  )
-}
+  );
+};
 
 const FileRecord = ({
   url,
@@ -146,14 +148,14 @@ const FileRecord = ({
 }): JSX.Element => {
   const [status, setStatus] = useState<
     'created' | 'uploading' | 'uploaded' | 'error'
-  >('created')
-  const [progress, setProgress] = useState<number>(0)
+  >('created');
+  const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
     function upload(): void {
-      setStatus('uploading')
-      const formData = new FormData()
-      formData.append('file', file)
+      setStatus('uploading');
+      const formData = new FormData();
+      formData.append('file', file);
 
       axios
         .post(`${process.env.NEXT_PUBLIC_API_URL}/${url}`, formData, {
@@ -161,31 +163,33 @@ const FileRecord = ({
             'Content-Type': 'multipart/form-data'
           },
           onUploadProgress: (event) => {
-            setProgress(Math.round((100 * event.loaded) / (event.total ?? 1)))
+            setProgress(Math.round((100 * event.loaded) / (event.total ?? 1)));
           }
         })
         .then(async (response) => {
-          setProgress(100)
-          setStatus('uploaded')
-          await completeCallback(true)
+          setProgress(100);
+          setStatus('uploaded');
+          await completeCallback(true);
         })
         .catch(async (error) => {
-          setStatus('error')
-          await completeCallback(false)
-          console.error(error)
-        })
+          setStatus('error');
+          await completeCallback(false);
+          console.error(error);
+        });
     }
 
-    if (status === 'created') upload()
-  }, [completeCallback, file, status, url])
+    if (status === 'created') {
+      upload();
+    }
+  }, [completeCallback, file, status, url]);
 
   const formatSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
-  }
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  };
 
   return (
     <div className="flex subtitle border-gray-50 rounded-sm w-full items-center p-[5px]">
@@ -212,7 +216,7 @@ const FileRecord = ({
         ) : null}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FileUploader
+export default FileUploader;

@@ -1,49 +1,23 @@
-import React, {useEffect, useState, useRef} from 'react'
-import {FaXmark} from 'react-icons/fa6'
-import {
-    FaPlus,
-    FaInfoCircle,
-    FaExclamationTriangle,
-    FaSave,
-    FaExclamationCircle,
-    FaCheckCircle
-} from 'react-icons/fa'
-import {validateTestSchema} from '@/lib/schemas/utils'
+import React, {useEffect, useState, useRef} from 'react';
+import {FaXmark} from 'react-icons/fa6';
+import {FaPlus, FaInfoCircle, FaExclamationTriangle, FaSave, FaExclamationCircle, FaCheckCircle} from 'react-icons/fa';
+import {validateTestSchema} from '@/lib/schemas/utils';
 import SampleUploadWidget from '@/lib/components/basic/SampleUploadWidget';
-import {validateApiData} from '@/core/apiHandlers/clientApiHandler'
-import {
-    type ExperimentSetup,
-    ExperimentSetupSchema,
-    type ABTest,
-    type ABXTest,
-    type FullABXTest,
-    type MUSHRATest,
-    type APETest,
-    type BaseTest
-} from '@/lib/schemas/experimentSetup'
-import {
-    getExperimentFetch,
-    getSampleFetch,
-    getSamplesFetch,
-    setUpExperimentFetch,
-} from '@/lib/utils/fetchers'
-import {
-    getSampleSchema,
-    getSamplesSchema,
-    setUpExperimentSchema,
-    uploadSampleSchema
-} from '@/lib/schemas/apiResults'
-import AbEditor from '../editors/AbEditor'
-import AbxEditor from '../editors/AbxEditor'
-import MushraEditor from '../editors/MushraEditor'
-import ApeEditor from '../editors/ApeEditor'
+import {validateApiData} from '@/core/apiHandlers/clientApiHandler';
+import {type ExperimentSetup, ExperimentSetupSchema, type ABTest, type ABXTest, type FullABXTest, type MUSHRATest, type APETest, type BaseTest} from '@/lib/schemas/experimentSetup';
+import {getExperimentFetch, getSampleFetch, getSamplesFetch, setUpExperimentFetch,} from '@/lib/utils/fetchers';
+import {getSampleSchema, getSamplesSchema, setUpExperimentSchema, uploadSampleSchema} from '@/lib/schemas/apiResults';
+import AbEditor from '../editors/AbEditor';
+import AbxEditor from '../editors/AbxEditor';
+import MushraEditor from '../editors/MushraEditor';
+import ApeEditor from '../editors/ApeEditor';
 
 function generateRandomString(): string {
-    const segments = []
+    const segments = [];
     for (let i = 0; i < 4; i++) {
-        segments.push(Math.floor(1000 + Math.random() * 9000))
+        segments.push(Math.floor(1000 + Math.random() * 9000));
     }
-    return segments.join('-')
+    return segments.join('-');
 }
 
 const CreateExperimentForm = ({
@@ -56,7 +30,7 @@ const CreateExperimentForm = ({
     useEffect(() => {
         getExperimentFetch(selectedExperiment, ExperimentSetupSchema)
             .then((response) => {
-                setSetup(response)
+                setSetup(response);
             })
             .catch(() => {
                 setSetup({
@@ -65,8 +39,8 @@ const CreateExperimentForm = ({
                     description: ' ',
                     endText: '',
                     tests: []
-                })
-            })
+                });
+            });
         getSamplesFetch(selectedExperiment, getSamplesSchema)
             .then((response) => {
                 setFileList((oldFileList) => Array.from(new Set([...oldFileList, ...response])));
@@ -75,7 +49,7 @@ const CreateExperimentForm = ({
                 console.error(error);
             });
 
-    }, [selectedExperiment])
+    }, [selectedExperiment]);
 
     const [setup, setSetup] = useState<ExperimentSetup>({
         uid: generateRandomString(),
@@ -83,7 +57,7 @@ const CreateExperimentForm = ({
         description: ' ',
         endText: '',
         tests: []
-    })
+    });
     const [currentTest, setCurrentTest] = useState<
         ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest
     >({
@@ -91,68 +65,68 @@ const CreateExperimentForm = ({
         type: 'AB',
         samples: [],
         questions: []
-    })
+    });
 
     const [fileList, setFileList] = useState<string[]>([]);
-    const [setupUploadedFlag, setSetupUploadedFlag] = useState<boolean>(false)
-    const [setupList, setSetupList] = useState<string[]>([])
-    const [setupError, setSetupError] = useState<string | null>(null)
-    const [showTooltip, setShowTooltip] = useState<number | null>(null)
+    const [setupUploadedFlag, setSetupUploadedFlag] = useState<boolean>(false);
+    const [setupList, setSetupList] = useState<string[]>([]);
+    const [setupError, setSetupError] = useState<string | null>(null);
+    const [showTooltip, setShowTooltip] = useState<number | null>(null);
     const [showUploadWidget, setShowUploadWidget] = useState(false);
-    const [showTooltipSetup, setShowTooltipSetup] = useState<boolean>(false)
-    const fileRef = useRef(null)
-    const [showInfo, setShowInfo] = useState<boolean>(false)
-    const [showSaveInfo, setShowSaveInfo] = useState<boolean>(false)
+    const [showTooltipSetup, setShowTooltipSetup] = useState<boolean>(false);
+    const fileRef = useRef(null);
+    const [showInfo, setShowInfo] = useState<boolean>(false);
+    const [showSaveInfo, setShowSaveInfo] = useState<boolean>(false);
 
 
     const readFile = (event: React.ChangeEvent<HTMLInputElement>): void => {
-        const fileReader = new FileReader()
-        const {files} = event.target
+        const fileReader = new FileReader();
+        const {files} = event.target;
         if (files === null) {
-            return
+            return;
         }
-        setSetupUploadedFlag(true)
-        setSetupList([])
+        setSetupUploadedFlag(true);
+        setSetupList([]);
         if (files[0].type !== 'application/json') {
-            setSetupError('Invalid file type. Please upload a JSON file.')
-            return
+            setSetupError('Invalid file type. Please upload a JSON file.');
+            return;
         }
-        fileReader.readAsText(files[0], 'UTF-8')
+        fileReader.readAsText(files[0], 'UTF-8');
         fileReader.onload = (e: ProgressEvent<FileReader>) => {
             if (e.target !== null) {
-                const content = e.target.result as string
+                const content = e.target.result as string;
                 try {
-                    const uploadedData: ExperimentSetup = JSON.parse(content)
-                    const {data, validationError} = validateApiData(
-                        uploadedData,
-                        ExperimentSetupSchema
-                    )
-                    const testValidationErrors: string[] = []
+                    const uploadedData: ExperimentSetup = JSON.parse(content);
+                    const {data, validationError} = validateApiData(uploadedData, ExperimentSetupSchema);
+                    const testValidationErrors: string[] = [];
                     if (validationError !== null) {
-                        setSetupError('Invalid setup file.')
+                        setSetupError('Invalid setup file.');
                     }
                     if (data !== null) {
                         data.tests.forEach((test) => {
-                            const validationResult = validateTestSchema(test)
-                            if (validationResult.validationError != null)
-                                testValidationErrors.push(validationResult.validationError)
-                            else test = validationResult.data
-                        })
+                            const validationResult = validateTestSchema(test);
+                            if (validationResult.validationError != null) {
+                                testValidationErrors.push(validationResult.validationError);
+                            }
+                            else {
+                                test = validationResult.data;
+                            }
+                        });
                         if (testValidationErrors.length <= 0) {
-                            setSetup(uploadedData)
-                            setSetupList([files[0].name])
-                            setSetupError(null)
-                            setSetupUploadedFlag(true)
+                            setSetup(uploadedData);
+                            setSetupList([files[0].name]);
+                            setSetupError(null);
+                            setSetupUploadedFlag(true);
                         } else {
-                            setSetupError('Invalid setup file.')
+                            setSetupError('Invalid setup file.');
                         }
                     }
                 } catch (error) {
-                    setSetupError('Invalid setup file.')
+                    setSetupError('Invalid setup file.');
                 }
             }
-        }
-    }
+        };
+    };
 
     const areAllFilesProvided = (
         test: ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest,
@@ -165,54 +139,54 @@ const CreateExperimentForm = ({
     };
 
     const handleDragOver = (e: React.DragEvent<HTMLLabelElement>): void => {
-        e.preventDefault()
-        e.stopPropagation()
-        e.currentTarget.classList.add('drag-over')
-    }
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.add('drag-over');
+    };
 
     const handleDragEnter = (e: React.DragEvent<HTMLLabelElement>): void => {
-        e.preventDefault()
-        e.stopPropagation()
-        e.currentTarget.classList.add('drag-over')
-    }
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.add('drag-over');
+    };
 
     const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>): void => {
-        e.preventDefault()
-        e.stopPropagation()
-        e.currentTarget.classList.remove('drag-over')
-    }
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.remove('drag-over');
+    };
 
 
     const handleDropSetup = (e: React.DragEvent<HTMLLabelElement>): void => {
-        e.preventDefault()
-        e.stopPropagation()
-        e.currentTarget.classList.remove('drag-over')
-        setSetupList([])
-        setSetupUploadedFlag(true)
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.remove('drag-over');
+        setSetupList([]);
+        setSetupUploadedFlag(true);
 
-        const fileReader = new FileReader()
-        const files = e.dataTransfer.files
+        const fileReader = new FileReader();
+        const files = e.dataTransfer.files;
 
         if (files[0].type !== 'application/json') {
-            setSetupError('Invalid file type. Please upload a JSON file.')
-            return
+            setSetupError('Invalid file type. Please upload a JSON file.');
+            return;
         }
 
-        fileReader.readAsText(files[0], 'UTF-8')
+        fileReader.readAsText(files[0], 'UTF-8');
         fileReader.onload = (e: ProgressEvent<FileReader>) => {
             if (e.target !== null) {
-                const content = e.target.result as string
+                const content = e.target.result as string;
                 if (JSON.parse(content).tests === undefined) {
-                    setSetupError('Invalid setup file.')
-                    return
+                    setSetupError('Invalid setup file.');
+                    return;
                 }
-                setSetupList([files[0].name])
-                setSetup(JSON.parse(content))
-                setSetupError(null)
+                setSetupList([files[0].name]);
+                setSetup(JSON.parse(content));
+                setSetupError(null);
             }
-        }
-    }
-    const handleSamplesSubmitted = (newSamples: { name: string; assetPath: string }[]) => {
+        };
+    };
+    const handleSamplesSubmitted = (newSamples: { name: string; assetPath: string }[]): void => {
         setFileList((prev) => [...prev, ...newSamples.map(sample => sample.assetPath)]);
     };
 
@@ -236,23 +210,23 @@ const CreateExperimentForm = ({
                                             setUpExperimentSchema
                                         )
                                             .then(() => {
-                                                setSelectedExperiment('')
+                                                setSelectedExperiment('');
                                             })
                                             .catch((error) => {
-                                                console.error(error)
-                                            })
+                                                console.error(error);
+                                            });
                                     } catch (error) {
-                                        console.error(error)
+                                        console.error(error);
                                     }
-                                })()
+                                })();
                             }}
                             className="cursor-pointer text-blue-400 dark:text-blue-500 hover:text-pink-500 dark:hover:text-pink-600 transform hover:scale-110 duration-300 ease-in-out"
                             size={35}
                             onMouseEnter={() => {
-                                setShowSaveInfo(true)
+                                setShowSaveInfo(true);
                             }}
                             onMouseLeave={() => {
-                                setShowSaveInfo(false)
+                                setShowSaveInfo(false);
                             }}
                         />
                         {showSaveInfo && (
@@ -264,7 +238,7 @@ const CreateExperimentForm = ({
                     </div>
                     <FaXmark
                         onClick={() => {
-                            setSelectedExperiment('')
+                            setSelectedExperiment('');
                         }}
                         className="cursor-pointer text-blue-400 dark:text-blue-500 hover:text-pink-500 dark:hover:text-pink-600 transform hover:scale-110 duration-300 ease-in-out"
                         size={40}
@@ -291,7 +265,7 @@ const CreateExperimentForm = ({
                                             questions: []
                                         }
                                     ]
-                                }))
+                                }));
                             }}
                         >
                             <FaPlus/>
@@ -307,7 +281,7 @@ const CreateExperimentForm = ({
                                     key={index}
                                     className="relative cursor-pointer p-2 text-white font-semibold bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-105 duration-300 ease-in-out rounded-md"
                                     onClick={() => {
-                                        setCurrentTest(test)
+                                        setCurrentTest(test);
                                     }}
                                 >
                                     <div className="flex items-center">
@@ -316,10 +290,10 @@ const CreateExperimentForm = ({
                                             <div
                                                 className="relative flex items-center ml-2"
                                                 onMouseEnter={() => {
-                                                    setShowTooltip(index)
+                                                    setShowTooltip(index);
                                                 }}
                                                 onMouseLeave={() => {
-                                                    setShowTooltip(null)
+                                                    setShowTooltip(null);
                                                 }}
                                             >
                                                 <FaExclamationTriangle
@@ -348,7 +322,7 @@ const CreateExperimentForm = ({
                                 setSetup((oldSetup) => ({
                                     ...oldSetup,
                                     description: e.target.value
-                                }))
+                                }));
                             }}
                         />
                     </div>
@@ -363,7 +337,7 @@ const CreateExperimentForm = ({
                                 setSetup((oldSetup) => ({
                                     ...oldSetup,
                                     endText: e.target.value
-                                }))
+                                }));
                             }}
                         />
                     </div>
@@ -371,7 +345,7 @@ const CreateExperimentForm = ({
 
                         <div>
                             <button
-                                onClick={() => setShowUploadWidget(true)}
+                                onClick={() => {setShowUploadWidget(true);}}
                                 className="py-3 px-6 bg-blue-500 text-white rounded-md hover:bg-blue-400 transition-colors shadow-sm"
                             >
                                 Add samples
@@ -379,7 +353,7 @@ const CreateExperimentForm = ({
                             {showUploadWidget && (
                                 <SampleUploadWidget
                                     experimentName={selectedExperiment}
-                                    onClose={() => setShowUploadWidget(false)}
+                                    onClose={() => {setShowUploadWidget(false);}}
                                     onSamplesSubmitted={handleSamplesSubmitted}
                                 />
                             )}
@@ -433,10 +407,10 @@ const CreateExperimentForm = ({
                                     <div
                                         className="absolute self-end mb-16 mr-2 z-20"
                                         onMouseEnter={() => {
-                                            setShowTooltipSetup(true)
+                                            setShowTooltipSetup(true);
                                         }}
                                         onMouseLeave={() => {
-                                            setShowTooltipSetup(false)
+                                            setShowTooltipSetup(false);
                                         }}
                                     >
                                         {setupError != null ? (
@@ -496,7 +470,7 @@ const CreateExperimentForm = ({
                                 <FaInfoCircle
                                     className="ml-2 text-blue-400 dark:text-blue-500 hover:text-pink-500 dark:hover:text-pink-600 transform hover:scale-110 duration-100 ease-in-out cursor-pointer"
                                     onClick={() => {
-                                        setShowInfo(!showInfo)
+                                        setShowInfo(!showInfo);
                                     }}
                                 />
                             </h4>
@@ -525,7 +499,7 @@ const CreateExperimentForm = ({
                                                     .value as 'MUSHRA',
                                                 anchors: [],
                                                 reference: {sampleId: '', assetPath: ''}
-                                            })
+                                            });
                                         }}
                                         className="hidden"
                                     />
@@ -558,7 +532,7 @@ const CreateExperimentForm = ({
                                                 type: (e.target as HTMLTextAreaElement).value as 'AB',
                                                 questions: [],
                                                 samples: currentTest.samples.slice(0, 2)
-                                            })
+                                            });
                                         }}
                                         className="hidden"
                                     />
@@ -591,7 +565,7 @@ const CreateExperimentForm = ({
                                                 type: (e.target as HTMLTextAreaElement).value as 'ABX',
                                                 questions: [],
                                                 samples: currentTest.samples.slice(0, 2)
-                                            })
+                                            });
                                         }}
                                         className="hidden"
                                     />
@@ -623,7 +597,7 @@ const CreateExperimentForm = ({
                                                 ...currentTest,
                                                 type: (e.target as HTMLTextAreaElement).value as 'APE',
                                                 axis: []
-                                            })
+                                            });
                                         }}
                                         className="hidden"
                                     />
@@ -656,7 +630,7 @@ const CreateExperimentForm = ({
                                             fileList={fileList}
                                             setSetup={setSetup}
                                         />
-                                    )
+                                    );
                                 case 'AB':
                                     return (
                                         <AbEditor
@@ -665,7 +639,7 @@ const CreateExperimentForm = ({
                                             fileList={fileList}
                                             setSetup={setSetup}
                                         />
-                                    )
+                                    );
                                 case 'ABX':
                                     return (
                                         <AbxEditor
@@ -683,16 +657,16 @@ const CreateExperimentForm = ({
                                             fileList={fileList}
                                             setSetup={setSetup}
                                         />
-                                    )
+                                    );
                                 default:
-                                    return null
+                                    return null;
                             }
                         })()}
                     </div>
                 )}
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default CreateExperimentForm
+export default CreateExperimentForm;
