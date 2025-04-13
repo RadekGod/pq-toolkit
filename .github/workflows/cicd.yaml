@@ -18,8 +18,7 @@ env:
   DOCS_REQ: docs/python-docs-requirements.txt
 
 jobs:
-  # Job 1: Budowanie obrazów Docker
-  build:
+  build_dev_image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -33,13 +32,12 @@ jobs:
       - name: Install Docker Compose
         run: sudo apt-get install docker-compose
 
-      - name: Copy .env file
-        run: cp src/deployments/.env.dev.sample src/deployments/.env.dev
+      - name: Ensure .env file existence
+        run: test -f src/deployments/flavors/dev/.env 
 
-      - name: Build Docker Images
-        run: docker compose -f src/deployments/docker-compose.yml build
+      - name: Build Image
+        run: docker compose -f src/deployments/flavors/dev/docker-compose.yml build
 
-  # Job 2: Sprawdzanie usług, lintowanie i testowanie
   service_check_and_test:
     runs-on: ubuntu-latest
     needs: build
@@ -47,37 +45,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Copy .env file
-        run: cp src/deployments/.env.dev.sample src/deployments/.env.dev
+      - name: Ensure .env file existence
+        run: test -f src/deployments/flavors/dev/.env 
 
       - name: Start Docker Compose services
         run: |
-          docker compose -f src/deployments/docker-compose.yml --env-file src/deployments/.env.dev up -d
+          docker compose -f src/deployments/flavors/dev/docker-compose.yml --env-file src/deployments/flavors/dev/.env up -d
 
       - name: Wait for Database and API to be healthy
         run: |
-          until docker compose -f src/deployments/docker-compose.yml --env-file src/deployments/.env.dev exec pq-toolkit-db-dev pg_isready -U postgres; do
+          until docker compose -f src/deployments/flavors/dev/docker-compose.yml --env-file src/deployments/flavors/dev/.env exec pq-toolkit-db-dev pg_isready -U postgres; do
             echo "Waiting for database..."
-            docker compose -f src/deployments/docker-compose.yml --env-file src/deployments/.env.dev logs pq-toolkit-db-dev
+            docker compose -f src/deployments/flavors/dev/docker-compose.yml --env-file src/deployments/flavors/dev/.env logs pq-toolkit-db-dev
             sleep 1
           done
 
       - name: Wait for Minio to be ready
         run: |
-          until docker compose -f src/deployments/docker-compose.yml --env-file src/deployments/.env.dev exec pq-sample-storage-minio-dev curl -s http://localhost:9000 > /dev/null; do
+          until docker compose -f src/deployments/flavors/dev/docker-compose.yml --env-file src/deployments/flavors/dev/.env exec pq-sample-storage-minio-dev curl -s http://localhost:9000 > /dev/null; do
             echo "Waiting for Minio to be ready..."
-            docker compose -f src/deployments/docker-compose.yml --env-file src/deployments/.env.dev logs pq-sample-storage-minio-dev
+            docker compose -f src/deployments/flavors/dev/docker-compose.yml --env-file src/deployments/flavors/dev/.env logs pq-sample-storage-minio-dev
             sleep 1
           done
           echo "Minio is ready."
 
       - name: Run Linting
-        run: docker compose -f src/deployments/docker-compose.yml --env-file src/deployments/.env.dev exec pq-toolkit-api-dev make lint
+        run: docker compose -f src/deployments/flavors/dev/docker-compose.yml --env-file src/deployments/flavors/dev/.env exec pq-toolkit-api-dev make lint
 
       - name: Run Tests
-        run: docker compose -f src/deployments/docker-compose.yml --env-file src/deployments/.env.dev exec pq-toolkit-api-dev make test
+        run: docker compose -f src/deployments/flavors/dev/docker-compose.yml --env-file src/deployments/flavors/dev/.env exec pq-toolkit-api-dev make test
 
-  # Job 3: Cleanup
   cleanup:
     runs-on: ubuntu-latest
     needs: service_check_and_test
@@ -85,13 +82,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Copy .env file
-        run: cp src/deployments/.env.dev.sample src/deployments/.env.dev
+      - name: Ensure .env file existence
+        run: test -f src/deployments/flavors/dev/.env 
 
       - name: Clean up Docker
-        run: docker compose -f src/deployments/docker-compose.yml down --rmi all
+        run: docker compose -f src/deployments/flavors/dev/docker-compose.yml down --rmi all
 
-  # Job 4: Pages
   pages:
     runs-on: ubuntu-latest
     needs: cleanup
