@@ -11,6 +11,7 @@ import AbEditor from '../editors/AbEditor';
 import AbxEditor from '../editors/AbxEditor';
 import MushraEditor from '../editors/MushraEditor';
 import ApeEditor from '../editors/ApeEditor';
+import { useToast, ToastType } from '@/lib/contexts/ToastContext';
 
 function generateRandomString(): string {
     const segments = [];
@@ -27,29 +28,59 @@ const CreateExperimentForm = ({
     selectedExperiment: string
     setSelectedExperiment: React.Dispatch<React.SetStateAction<string>>
 }): JSX.Element => {
+    const { addToast } = useToast();
+    const setupLoadedRef = useRef(false);
+
     useEffect(() => {
+        let isSubscribed = true;
+        setupLoadedRef.current = false;
+
         getExperimentFetch(selectedExperiment, ExperimentSetupSchema)
             .then((response) => {
-                setSetup(response);
+                if (isSubscribed) {
+                    setSetup(response);
+                    if (!setupLoadedRef.current) {
+                        addToast('Experiment setup loaded successfully', ToastType.SUCCESS);
+                        setupLoadedRef.current = true;
+                    }
+                }
             })
             .catch(() => {
-                setSetup({
-                    uid: generateRandomString(),
-                    name: selectedExperiment,
-                    description: ' ',
-                    endText: '',
-                    tests: []
-                });
-            });
-        getSamplesFetch(selectedExperiment, getSamplesSchema)
-            .then((response) => {
-                setFileList((oldFileList) => Array.from(new Set([...oldFileList, ...response])));
-            })
-            .catch((error) => {
-                console.error(error);
+                if (isSubscribed) {
+                    setSetup({
+                        uid: generateRandomString(),
+                        name: selectedExperiment,
+                        description: ' ',
+                        endText: '',
+                        tests: []
+                    });
+                    if (!setupLoadedRef.current) {
+                        addToast('Created new experiment setup', ToastType.INFO);
+                        setupLoadedRef.current = true;
+                    }
+                }
             });
 
-    }, [selectedExperiment]);
+        getSamplesFetch(selectedExperiment, getSamplesSchema)
+            .then((response) => {
+                if (isSubscribed) {
+                    setFileList((oldFileList) => Array.from(new Set([...oldFileList, ...response])));
+                    if (response.length > 0) {
+                        addToast(`Loaded ${response.length} existing samples`, ToastType.SUCCESS);
+                    }
+                }
+            })
+            .catch((error) => {
+                if (isSubscribed) {
+                    console.error(error);
+                    addToast('Failed to load existing samples', ToastType.ERROR);
+                }
+            });
+
+        return () => {
+            isSubscribed = false;
+        };
+    }, [selectedExperiment, addToast]);
 
     const [setup, setSetup] = useState<ExperimentSetup>({
         uid: generateRandomString(),
@@ -89,6 +120,7 @@ const CreateExperimentForm = ({
         setSetupList([]);
         if (files[0].type !== 'application/json') {
             setSetupError('Invalid file type. Please upload a JSON file.');
+            addToast('Invalid file type. Please upload a JSON file.', ToastType.ERROR);
             return;
         }
         fileReader.readAsText(files[0], 'UTF-8');
@@ -101,6 +133,7 @@ const CreateExperimentForm = ({
                     const testValidationErrors: string[] = [];
                     if (validationError !== null) {
                         setSetupError('Invalid setup file.');
+                        addToast('Invalid setup file structure', ToastType.ERROR);
                     }
                     if (data !== null) {
                         data.tests.forEach((test) => {
@@ -117,12 +150,15 @@ const CreateExperimentForm = ({
                             setSetupList([files[0].name]);
                             setSetupError(null);
                             setSetupUploadedFlag(true);
+                            addToast('Experiment setup uploaded successfully', ToastType.SUCCESS);
                         } else {
                             setSetupError('Invalid setup file.');
+                            addToast('Invalid test configuration in setup file', ToastType.ERROR);
                         }
                     }
                 } catch (error) {
                     setSetupError('Invalid setup file.');
+                    addToast('Failed to parse setup file', ToastType.ERROR);
                 }
             }
         };
@@ -190,6 +226,21 @@ const CreateExperimentForm = ({
         setFileList((prev) => [...prev, ...newSamples.map(sample => sample.assetPath)]);
     };
 
+    const handleSave = async (): Promise<void> => {
+        try {
+            const response = await setUpExperimentFetch(
+                selectedExperiment,
+                setup,
+                setUpExperimentSchema
+            );
+            addToast('Experiment setup saved successfully', ToastType.SUCCESS);
+            return response;
+        } catch (error) {
+            console.error('Error saving experiment:', error);
+            addToast('Failed to save experiment setup', ToastType.ERROR);
+        }
+    };
+
     return (
         <div
             className="flex flex-col self-center fadeInUpFast 2xl:self-start text-black dark:text-white bg-gray-50 dark:bg-stone-800 rounded-3xl shadow-lg 2xl:shadow-2xl w-full max-w-4xl z-10 p-6 overflow-hidden">
@@ -201,25 +252,7 @@ const CreateExperimentForm = ({
                     <div className="relative inline-block">
                         <FaSave
                             aria-label="save-setup"
-                            onClick={() => {
-                                void (async () => {
-                                    try {
-                                        setUpExperimentFetch(
-                                            selectedExperiment,
-                                            setup,
-                                            setUpExperimentSchema
-                                        )
-                                            .then(() => {
-                                                setSelectedExperiment('');
-                                            })
-                                            .catch((error) => {
-                                                console.error(error);
-                                            });
-                                    } catch (error) {
-                                        console.error(error);
-                                    }
-                                })();
-                            }}
+                            onClick={handleSave}
                             className="cursor-pointer text-blue-400 dark:text-blue-500 hover:text-pink-500 dark:hover:text-pink-600 transform hover:scale-110 duration-300 ease-in-out"
                             size={35}
                             onMouseEnter={() => {
