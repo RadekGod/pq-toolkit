@@ -18,7 +18,7 @@ const ExperimentResultsChart = ({
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchExperimentResults = async () => {
+        const fetchExperimentResults = async (): Promise<void> => {
             try {
                 setIsLoading(true);
                 setError(null);

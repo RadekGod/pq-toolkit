@@ -7,10 +7,11 @@ import {
   type ExperimentSetup,
   type FullABXTest,
   type MUSHRATest
-} from '@/lib/schemas/experimentSetup'
-import { useState } from 'react'
-import { FaPlus } from 'react-icons/fa'
-import DeleteQuestionComp from '../form/deleteQuestionComp'
+} from '@/lib/schemas/experimentSetup';
+import { useState } from 'react';
+import { FaPlus } from 'react-icons/fa';
+import DeleteQuestionComp from '../form/deleteQuestionComp';
+import { useToast, ToastType } from '@/lib/contexts/ToastContext';
 
 const AbEditor = ({
   currentTest,
@@ -27,8 +28,84 @@ const AbEditor = ({
   fileList: string[]
   setSetup: React.Dispatch<React.SetStateAction<ExperimentSetup>>
 }): JSX.Element => {
-  const [newQuestion, setNewQuestion] = useState<string>('')
-  const [sampleTest, setSampleTest] = useState<Sample[]>(currentTest.samples)
+  const [newQuestion, setNewQuestion] = useState<string>('');
+  const [sampleTest, setSampleTest] = useState<Sample[]>(currentTest.samples);
+  const { addToast } = useToast();
+
+  const handleSampleChange = (assetPath: string, isChecked: boolean) => {
+    if (isChecked) {
+      if (sampleTest.length < 2) {
+        setSampleTest((oldarray) => [
+          ...oldarray,
+          { sampleId: assetPath, assetPath: assetPath }
+        ]);
+        addToast(`Added sample: ${assetPath}`, ToastType.SUCCESS);
+      }
+    } else {
+      const foundJSON = sampleTest.find((item) => {
+        return item.assetPath === assetPath;
+      });
+      if (foundJSON !== undefined) {
+        setSampleTest((oldarray) =>
+          oldarray.filter(
+            (sample) =>
+              ![foundJSON.assetPath].includes(
+                sample.assetPath
+              )
+          )
+        );
+        addToast(`Removed sample: ${assetPath}`, ToastType.INFO);
+      }
+    }
+  };
+
+  const handleAddQuestion = () => {
+    if (newQuestion.length === 0) {
+      addToast('Question text cannot be empty', ToastType.WARNING);
+      return;
+    }
+
+    if (currentTest.questions?.some((q) => q.text === newQuestion)) {
+      addToast('This question already exists', ToastType.WARNING);
+      return;
+    }
+
+    if (currentTest.questions != null) {
+      setCurrentTest({
+        ...currentTest,
+        questions: [
+          ...currentTest.questions,
+          {
+            questionId: newQuestion,
+            text: newQuestion
+          }
+        ]
+      });
+    } else {
+      setCurrentTest({
+        ...currentTest,
+        questions: [{ questionId: newQuestion, text: newQuestion }]
+      });
+    }
+    addToast('Question added successfully', ToastType.SUCCESS);
+    setNewQuestion('');
+  };
+
+  const handleDeleteTest = () => {
+    setSetup((oldSetup) => ({
+      ...oldSetup,
+      tests: oldSetup.tests
+        .filter((test) => test.testNumber !== currentTest.testNumber)
+        .map((test) => {
+          if (test.testNumber > currentTest.testNumber) {
+            return { ...test, testNumber: test.testNumber - 1 };
+          }
+          return test;
+        })
+    }));
+    addToast('Test deleted successfully', ToastType.SUCCESS);
+  };
+
   return (
     <div className="w-full">
       <h4 className="font-semibold text-sm lg:text-base mb-1 mt-3">Samples</h4>
@@ -41,9 +118,8 @@ const AbEditor = ({
           ) : (
             fileList.map((assetPath) => {
               const isChecked =
-                sampleTest.filter((sample) => sample.assetPath === assetPath)
-                  .length > 0
-              const isDisabled = !isChecked && sampleTest.length >= 2
+                sampleTest.filter((sample) => sample.assetPath === assetPath).length > 0;
+              const isDisabled = !isChecked && sampleTest.length >= 2;
               return (
                 <label
                   key={assetPath}
@@ -55,30 +131,7 @@ const AbEditor = ({
                     checked={isChecked}
                     name={assetPath}
                     disabled={isDisabled}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        if (sampleTest.length < 2) {
-                          setSampleTest((oldarray) => [
-                            ...oldarray,
-                            { sampleId: assetPath, assetPath: assetPath }
-                          ])
-                        }
-                      } else {
-                        const foundJSON = sampleTest.find((item) => {
-                          return item.assetPath === assetPath
-                        })
-                        if (foundJSON !== undefined) {
-                          setSampleTest((oldarray) =>
-                            oldarray.filter(
-                              (sample) =>
-                                ![foundJSON.assetPath].includes(
-                                  sample.assetPath
-                                )
-                            )
-                          )
-                        }
-                      }
-                    }}
+                    onChange={(e) => handleSampleChange(assetPath, e.target.checked)}
                     className="hidden"
                   />
                   <span className="w-4 h-4 flex items-center justify-center">
@@ -121,7 +174,7 @@ const AbEditor = ({
                     {assetPath}
                   </span>
                 </label>
-              )
+              );
             })
           )}
         </div>
@@ -132,30 +185,11 @@ const AbEditor = ({
           className="rounded outline-0 border-2 bg-gray-50 border-gray-300 dark:bg-gray-800 dark:border-gray-500 text-black dark:text-white w-full"
           value={newQuestion}
           onChange={(e) => {
-            setNewQuestion(e.target.value)
+            setNewQuestion(e.target.value);
           }}
         />
         <button
-          onClick={() => {
-            if (currentTest.questions != null) {
-              setCurrentTest({
-                ...currentTest,
-                questions: [
-                  ...currentTest.questions,
-                  {
-                    questionId: newQuestion,
-                    text: newQuestion
-                  }
-                ]
-              })
-            } else {
-              setCurrentTest({
-                ...currentTest,
-                questions: [{ questionId: newQuestion, text: newQuestion }]
-              })
-            }
-            setNewQuestion('')
-          }}
+          onClick={handleAddQuestion}
           disabled={
             newQuestion.length === 0 ||
             currentTest.questions?.some((q) => q.text === newQuestion)
@@ -187,56 +221,33 @@ const AbEditor = ({
       <div className="mt-auto ml-auto mb-2 self-center mr-auto flex flex-row justify-around max-w-[15rem] space-x-2 sm:space-x-sm lg:space-x-md">
         <button
           className="px-5 sm:px-8 py-2 bg-pink-500 dark:bg-pink-600 text-white font-semibold rounded-lg shadow-sm hover:bg-pink-600 dark:hover:bg-pink-700 transform hover:scale-105 duration-300 ease-in-out"
-          onClick={() => {
-            setSetup((oldSetup) => ({
-              ...oldSetup,
-              tests: oldSetup.tests
-                .filter((test) => test.testNumber !== currentTest.testNumber)
-                .map((test) => {
-                  if (test.testNumber > currentTest.testNumber) {
-                    return { ...test, testNumber: test.testNumber - 1 }
-                  }
-                  return test
-                })
-            }))
-            setCurrentTest((oldTest) => ({ ...oldTest, testNumber: -1 }))
-          }}
+          onClick={handleDeleteTest}
         >
           Delete
         </button>
         <button
-          className="px-7 sm:px-10 py-2 bg-blue-400 dark:bg-blue-500 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-500 dark:hover:bg-blue-600 transform hover:scale-105 duration-300 ease-in-out"
+          className="px-5 sm:px-8 py-2 bg-blue-400 dark:bg-blue-500 text-white font-semibold rounded-lg shadow-sm hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-105 duration-300 ease-in-out"
           onClick={() => {
-            const updatedTest = {
+            if (sampleTest.length !== 2) {
+              addToast('Please select exactly 2 samples', ToastType.WARNING);
+              return;
+            }
+            if (!currentTest.questions?.length) {
+              addToast('Please add at least one question', ToastType.WARNING);
+              return;
+            }
+            setCurrentTest({
               ...currentTest,
               samples: sampleTest
-            }
-
-            if ('axis' in updatedTest) {
-              delete updatedTest.axis
-            }
-            if ('anchors' in updatedTest) {
-              delete updatedTest.anchors
-            }
-            if ('reference' in updatedTest) {
-              delete updatedTest.reference
-            }
-
-            setSetup((oldSetup) => ({
-              ...oldSetup,
-              tests: oldSetup.tests.map((test) =>
-                test.testNumber === updatedTest.testNumber ? updatedTest : test
-              )
-            }))
-
-            setCurrentTest(updatedTest)
+            });
+            addToast('Test configuration saved', ToastType.SUCCESS);
           }}
         >
           Save
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AbEditor
+export default AbEditor;

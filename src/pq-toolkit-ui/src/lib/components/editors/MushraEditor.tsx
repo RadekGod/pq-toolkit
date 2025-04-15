@@ -7,8 +7,8 @@ import {
   type ExperimentSetup,
   type FullABXTest,
   type MUSHRATest
-} from '@/lib/schemas/experimentSetup'
-import { useState } from 'react'
+} from '@/lib/schemas/experimentSetup';
+import { useState } from 'react';
 
 const MushraEditor = ({
   currentTest,
@@ -25,13 +25,13 @@ const MushraEditor = ({
   fileList: string[];
   setSetup: React.Dispatch<React.SetStateAction<ExperimentSetup>>
 }): JSX.Element => {
-  const [sampleTest, setSampleTest] = useState<Sample[]>(currentTest.samples)
+  const [sampleTest, setSampleTest] = useState<Sample[]>(currentTest.samples);
   const [anchorsTest, setAnchorsTest] = useState<Sample[]>(
     currentTest.anchors ?? []
-  )
+  );
   const [referenceTest, setReferenceTest] = useState<Sample>(
     currentTest.reference ?? { sampleId: '', assetPath: '' }
-  )
+  );
   return (
     <div className="w-full">
       <h4 className="font-semibold text-sm lg:text-base mb-1 mt-3">
@@ -59,9 +59,9 @@ const MushraEditor = ({
                       setReferenceTest({
                         sampleId: 'ref',
                         assetPath: assetPath
-                      })
+                      });
                     } else {
-                      setReferenceTest({ sampleId: '', assetPath: '' })
+                      setReferenceTest({ sampleId: '', assetPath: '' });
                     }
                   }}
                   className="hidden"
@@ -110,13 +110,13 @@ const MushraEditor = ({
                       setAnchorsTest((oldarray) => [
                         ...oldarray,
                         { sampleId: assetPath, assetPath: assetPath }
-                      ])
+                      ]);
                     } else {
                       setAnchorsTest((oldarray) =>
                         oldarray.filter(
                           (sample) => sample.assetPath !== assetPath
                         )
-                      )
+                      );
                     }
                   }}
                   className="hidden"
@@ -182,13 +182,13 @@ const MushraEditor = ({
                       setSampleTest((oldarray) => [
                         ...oldarray,
                         { sampleId: assetPath, assetPath: assetPath }
-                      ])
+                      ]);
                     } else {
                       setSampleTest((oldarray) =>
                         oldarray.filter(
                           (sample) => sample.assetPath !== assetPath
                         )
-                      )
+                      );
                     }
                   }}
                   className="hidden"
@@ -239,12 +239,12 @@ const MushraEditor = ({
                 .filter((test) => test.testNumber !== currentTest.testNumber)
                 .map((test) => {
                   if (test.testNumber > currentTest.testNumber) {
-                    return { ...test, testNumber: test.testNumber - 1 }
+                    return { ...test, testNumber: test.testNumber - 1 };
                   }
-                  return test
+                  return test;
                 })
-            }))
-            setCurrentTest((oldTest) => ({ ...oldTest, testNumber: -1 }))
+            }));
+            setCurrentTest((oldTest) => ({ ...oldTest, testNumber: -1 }));
           }}
         >
           Delete
@@ -257,13 +257,13 @@ const MushraEditor = ({
               samples: sampleTest,
               anchors: anchorsTest,
               reference: referenceTest
-            }
+            };
 
             if ('questions' in updatedTest) {
-              delete updatedTest.questions
+              delete updatedTest.questions;
             }
             if ('axis' in updatedTest) {
-              delete updatedTest.axis
+              delete updatedTest.axis;
             }
 
             setSetup((oldSetup) => ({
@@ -271,15 +271,15 @@ const MushraEditor = ({
               tests: oldSetup.tests.map((test) =>
                 test.testNumber === updatedTest.testNumber ? updatedTest : test
               )
-            }))
+            }));
 
-            setCurrentTest(updatedTest)
+            setCurrentTest(updatedTest);
           }}
         >
           Save
         </button>
       </div>
     </div>
-  )
-}
-export default MushraEditor
+  );
+};
+export default MushraEditor;

@@ -1,23 +1,23 @@
-'use client'
+'use client';
 
-import useSWR, { type KeyedMutator } from 'swr'
-import Loading from '../loading'
-import LoginPage from '../../lib/components/login/login-page'
-import { addNewExperimentFetch, userFetch } from '@/lib/utils/fetchers'
+import useSWR, { type KeyedMutator } from 'swr';
+import Loading from '../loading';
+import LoginPage from '../../lib/components/login/login-page';
+import { addNewExperimentFetch, userFetch } from '@/lib/utils/fetchers';
 import {
   addExperimentSchema,
   type getExperimentsData,
   type UserData
-} from '@/lib/schemas/apiResults'
-import { useState } from 'react'
-import { validateApiData } from '@/core/apiHandlers/clientApiHandler'
-import { adminExperimentsListSchema } from './models'
-import Header from '@/lib/components/basic/header'
-import Blobs from '@/lib/components/basic/blobs'
-import { FaExpand, FaMinus, FaPlus } from 'react-icons/fa'
-import CreateExperimentForm from '@/lib/components/form/createExperimentForm'
-import DeleteButton from '@/lib/components/basic/deleteButton'
-import { TbLogout2 } from 'react-icons/tb'
+} from '@/lib/schemas/apiResults';
+import { useState } from 'react';
+import { validateApiData } from '@/core/apiHandlers/clientApiHandler';
+import { adminExperimentsListSchema } from './models';
+import Header from '@/lib/components/basic/header';
+import Blobs from '@/lib/components/basic/blobs';
+import { FaExpand, FaMinus, FaPlus } from 'react-icons/fa';
+import CreateExperimentForm from '@/lib/components/form/createExperimentForm';
+import DeleteButton from '@/lib/components/basic/deleteButton';
+import { TbLogout2 } from 'react-icons/tb';
 
 const AdminPage = ({
   refreshAdminPage
@@ -29,12 +29,14 @@ const AdminPage = ({
     error,
     isLoading,
     mutate
-  } = useSWR<getExperimentsData>(`/api/v1/experiments`)
+  } = useSWR<getExperimentsData>(`/api/v1/experiments`);
 
-  const [selectedExperiment, setSelectedExperiment] = useState<string>('')
-  const [isListVisible, setIsListVisible] = useState<boolean>(true)
+  const [selectedExperiment, setSelectedExperiment] = useState<string>('');
+  const [isListVisible, setIsListVisible] = useState<boolean>(true);
 
-  if (isLoading) return <Loading />
+  if (isLoading) {
+      return <Loading />;
+  }
   if (error != null)
     return (
       <div className="flex w-full min-h-screen items-center justify-center text-center h2">
@@ -42,18 +44,18 @@ const AdminPage = ({
         <br />
         {error.toString()}
       </div>
-    )
+    );
   const { data, validationError } = validateApiData(
     apiData,
     adminExperimentsListSchema
-  )
+  );
   if (validationError != null) {
-    console.error(validationError)
+    console.error(validationError);
     return (
       <div className="flex w-full min-h-screen items-center justify-center text-center h2">
         Invalid data from API, please check console for details
       </div>
-    )
+    );
   }
 
   return (
@@ -85,7 +87,7 @@ const AdminPage = ({
               <button
                 className="flex items-center text-sm bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-110 duration-300 ease-in-out rounded-xl p-xxs text-white"
                 onClick={() => {
-                  setIsListVisible(true)
+                  setIsListVisible(true);
                 }}
               >
                 <FaExpand className="mr-2" />
@@ -104,8 +106,8 @@ const AdminPage = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const AdminExperimentsListWidget = ({
   experiments,
@@ -125,7 +127,7 @@ const AdminExperimentsListWidget = ({
       <button
         className="absolute top-4 right-4 flex items-center text-sm bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-110 duration-300 ease-in-out rounded-xl p-xxs text-white"
         onClick={() => {
-          setIsListVisible(false)
+          setIsListVisible(false);
         }}
       >
         <FaMinus className="mr-2" />
@@ -151,7 +153,7 @@ const AdminExperimentsListWidget = ({
               <div
                 className="font-semibold text-white w-9/12 sm:w-[85%] lg:w-[90%] 2xl:w-10/12 bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-105 duration-300 ease-in-out p-2 rounded-md cursor-pointer"
                 onClick={() => {
-                  setSelectedExperiment(name)
+                  setSelectedExperiment(name);
                 }}
               >
                 {name}
@@ -167,8 +169,8 @@ const AdminExperimentsListWidget = ({
         </ul>
       </div>
     </div>
-  )
-}
+  );
+};
 
 const AddExperimentWidget = ({
   experiments,
@@ -177,7 +179,7 @@ const AddExperimentWidget = ({
   experiments: string[]
   refreshPage: KeyedMutator<getExperimentsData>
 }): JSX.Element => {
-  const [newExperimentName, setNewExperimentName] = useState('')
+  const [newExperimentName, setNewExperimentName] = useState('');
 
   return (
     <div className="flex items-center z-10 mt-4 w-full">
@@ -193,15 +195,15 @@ const AddExperimentWidget = ({
           addNewExperimentFetch(newExperimentName, addExperimentSchema)
             .then(async () => {
               try {
-                await refreshPage()
+                await refreshPage();
               } catch (error) {
-                console.error(error)
+                console.error(error);
               }
             })
             .catch((error) => {
-              console.error(error)
-            })
-          setNewExperimentName('')
+              console.error(error);
+            });
+          setNewExperimentName('');
         }}
         disabled={
           newExperimentName.length === 0 ||
@@ -212,8 +214,8 @@ const AddExperimentWidget = ({
         <FaPlus />
       </button>
     </div>
-  )
-}
+  );
+};
 
 const LoginSwitch = (): JSX.Element => {
   const {
@@ -221,23 +223,25 @@ const LoginSwitch = (): JSX.Element => {
     error,
     isLoading,
     mutate
-  } = useSWR<UserData>(`/api/v1/auth/user`, userFetch)
-  if (isLoading) return <Loading />
+  } = useSWR<UserData>(`/api/v1/auth/user`, userFetch);
+  if (isLoading) {
+      return <Loading />;
+  }
   if (error != null)
     if (error.message.includes('"status":401') as boolean) {
-      return <LoginPage refreshAdminPage={mutate} />
+      return <LoginPage refreshAdminPage={mutate} />;
     } else
       return (
         <div>
           <div>Authorization Error</div>
           <div>{error.toString()}</div>
         </div>
-      )
+      );
   if (apiData?.is_active ?? false) {
-    return <AdminPage refreshAdminPage={mutate} />
+    return <AdminPage refreshAdminPage={mutate} />;
   } else {
-    return <LoginPage refreshAdminPage={mutate} />
+    return <LoginPage refreshAdminPage={mutate} />;
   }
-}
+};
 
-export default LoginSwitch
+export default LoginSwitch;

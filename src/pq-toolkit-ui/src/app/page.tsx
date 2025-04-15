@@ -1,11 +1,11 @@
-'use client'
-import Link from 'next/link'
-import { experimentsListSchema } from './models'
-import useSWR from 'swr'
-import Loading from './loading'
-import { validateApiData } from '@/core/apiHandlers/clientApiHandler'
-import Header from '@/lib/components/basic/header'
-import Blobs from '../lib/components/basic/blobs'
+'use client';
+import Link from 'next/link';
+import { experimentsListSchema } from './models';
+import useSWR from 'swr';
+import Loading from './loading';
+import { validateApiData } from '@/core/apiHandlers/clientApiHandler';
+import Header from '@/lib/components/basic/header';
+import Blobs from '../lib/components/basic/blobs';
 
 const Home = (): JSX.Element => {
   return (
@@ -26,18 +26,18 @@ const Home = (): JSX.Element => {
         <ExperimentsListWidget />
       </div>
     </div>
-  )
-}
+  );
+};
 
 const ExperimentsListWidget = (): JSX.Element => {
-  const { data: apiData, error, isLoading } = useSWR(`/api/v1/experiments/`)
+  const { data: apiData, error, isLoading } = useSWR(`/api/v1/experiments/`);
 
   if (isLoading)
     return (
       <div className="fadeInUp">
         <Loading />
       </div>
-    )
+    );
   if (error != null)
     return (
       <div className="flex w-full fadeInUp items-center justify-center text-center h2">
@@ -45,18 +45,18 @@ const ExperimentsListWidget = (): JSX.Element => {
         <br />
         {error.toString()}
       </div>
-    )
+    );
   const { data, validationError } = validateApiData(
     apiData,
     experimentsListSchema
-  )
+  );
   if (validationError != null) {
-    console.error(validationError)
+    console.error(validationError);
     return (
       <div className="flex w-full fadeInUp items-center justify-center text-center h2">
         Invalid data from API, please check console for details
       </div>
-    )
+    );
   }
 
   return (
@@ -80,7 +80,7 @@ const ExperimentsListWidget = (): JSX.Element => {
         ))}
       </ul>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

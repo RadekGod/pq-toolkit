@@ -13,8 +13,6 @@ import {
 } from '@/lib/utils/fetchers';
 import {validateApiData} from '@/core/apiHandlers/clientApiHandler';
 import {useState, useEffect} from 'react';
-import {SampleData, SamplesListSchema, UserData} from "@/lib/schemas/apiResults";
-
 const RankingPage = (): JSX.Element => {
     const {data: userData} = useSWR<UserData>('/api/v1/auth/user', userFetch);
     const isLoggedIn = !!userData?.is_active;
@@ -64,7 +62,7 @@ const RankingPage = (): JSX.Element => {
         );
     }
 
-    const handleSubmitFiles = async () => {
+    const handleSubmitFiles = async (): Promise<void> => {
         try {
             const formData = new FormData();
             uploadedSamples.forEach((sample) => {
@@ -92,7 +90,7 @@ const RankingPage = (): JSX.Element => {
         }
     };
 
-    const handleDeleteSample = async (sampleId: string) => {
+    const handleDeleteSample = async (sampleId: string): Promise<void> => {
         try {
             const response = await fetch(`/api/v1/samples/${sampleId}`, {
                 method: 'DELETE',
@@ -113,7 +111,7 @@ const RankingPage = (): JSX.Element => {
         }
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const files = e.target.files;
         if (files) {
             const newSamples = Array.from(files).map((file) => ({
@@ -124,12 +122,12 @@ const RankingPage = (): JSX.Element => {
         }
     };
 
-    const handleWidgetClose = () => {
+    const handleWidgetClose = (): void => {
         setShowUploadWidget(false);
         setUploadedSamples([]);
     };
 
-    const handleSendSamples = async () => {
+    const handleSendSamples = async (): Promise<void> => {
         try {
             const updatedSamples = await fetchSamples();
             setSortedSamples(updatedSamples.samples);
@@ -140,14 +138,14 @@ const RankingPage = (): JSX.Element => {
         }
     };
 
-    const handleRating = (sampleIndex: number, rating: number) => {
+    const handleRating = (sampleIndex: number, rating: number): void => {
         setRatings((prevRatings) => ({
             ...prevRatings,
             [sampleIndex]: prevRatings[sampleIndex] === rating ? null : rating,
         }));
     };
 
-    const handleSubmitFeedback = async (sampleIndex: number) => {
+    const handleSubmitFeedback = async (sampleIndex: number): Promise<void> => {
         try {
             const ratedSample = {
                 sampleId: sortedSamples[sampleIndex].sampleId,
@@ -175,7 +173,7 @@ const RankingPage = (): JSX.Element => {
         }
     };
 
-    const toggleSort = () => {
+    const toggleSort = (): void => {
         const newSortOrder = sortOrder === 'asc' ? 'desc' : sortOrder === 'desc' ? null : 'asc';
         setSortOrder(newSortOrder);
 
@@ -189,7 +187,7 @@ const RankingPage = (): JSX.Element => {
         }
     };
 
-    const renderSortIcon = () => {
+    const renderSortIcon = (): string => {
         if (sortOrder === 'asc') return '▲';
         if (sortOrder === 'desc') return '▼';
         return '▲▼';
