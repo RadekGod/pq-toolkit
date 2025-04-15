@@ -117,6 +117,17 @@ Fix: add `/` in the command from the error message in `src/pq-toolkit-ui/Dockerf
 COPY package*.json ./
 ```
 
+#### Error message:
+```bash
+/usr/bin/env: 'bash\r': No such file or directory
+/usr/bin/env: use -[v]S to pass options in shebang lines
+
+When trying to do make start-dev on windows operating system
+Solution: In prestart.sh file there tends to be a problem iwht file encoding, therefore "\r" sign is artificially added at the
+ end of the line "#! /usr/bin/env bash" causing this error to occur.
+  You need to ensure that thereis no "\r" sign at the end of this line (for example by deleting it).
+```
+
 ## 2024L notes
 
 Initially, the project was planned for 3 people, but at the beginning we received information that it would be for 6 people, 3 people each from two different fields and subjects. This caused a slight disruption in the plans, but in order to control the situation as quickly as possible and minimize the number of problems, we decided to divide the work between backend - ZPRP group and fronted WIMU group. This allowed us to complete the project efficiently despite the large number of people involved.
