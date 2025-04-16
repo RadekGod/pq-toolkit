@@ -2,7 +2,7 @@
 
 import Header from '@/lib/components/basic/header';
 import Blobs from '@/lib/components/basic/blobs';
-import useSWR, {type KeyedMutator} from 'swr';
+import useSWR from 'swr';
 import {FaTrash} from 'react-icons/fa';
 import AudioPlayer from '@/lib/components/player/audioplayer';
 import Loading from '../loading';
@@ -13,6 +13,8 @@ import {
 } from '@/lib/utils/fetchers';
 import {validateApiData} from '@/core/apiHandlers/clientApiHandler';
 import {useState, useEffect} from 'react';
+import {SamplesListSchema, type SampleData, type UserData} from "@/lib/schemas/apiResults";
+
 const RankingPage = (): JSX.Element => {
     const {data: userData} = useSWR<UserData>('/api/v1/auth/user', userFetch);
     const isLoggedIn = !!userData?.is_active;
