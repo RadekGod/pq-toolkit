@@ -5,12 +5,17 @@ dev_addr: '0.0.0.0:8000'
 nav:
   - 'Home': index.md
   - 'Getting started':
+    - 'Test types overview': getting-started/test-types-overview.md
     - 'Prerequisites': getting-started/prerequisites.md
-    - 'API Client walkthrough': getting-started/api-client-walkthrough.md
+  - 'Instalation and usage':
+    - 'Python Plugin': instalation-and-usage/python-plugin.md
+    - 'Web Aplication': instalation-and-usage/web-aplication.md
+    - 'Troubleshooting': instalation-and-usage/troubleshooting.md 
   - 'Python API client reference':
-    - 'PqToolkitAPIClient': reference/PqToolkitAPIClient.md
-    - 'Exceptions': reference/exceptions.md
-    - 'Dataclasses': reference/dataclasses.md
+    - 'API Client walkthrough': python-api-client/api-client-walkthrough.md
+    - 'PqToolkitAPIClient Class': python-api-client/PqToolkitAPIClient.md
+    - 'Exceptions': python-api-client/exceptions.md
+    - 'Dataclasses': python-api-client/dataclasses.md
 theme:
   name: material
   features:
