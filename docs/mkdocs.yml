@@ -9,7 +9,7 @@ nav:
     - 'Prerequisites': getting-started/prerequisites.md
   - 'Instalation and usage':
     - 'Python Plugin': instalation-and-usage/python-plugin.md
-    - 'Web Aplication': instalation-and-usage/web-aplication.md
+    - 'Web Application': instalation-and-usage/web-application.md
     - 'Troubleshooting': instalation-and-usage/troubleshooting.md 
   - 'Python API client reference':
     - 'API Client walkthrough': python-api-client/api-client-walkthrough.md

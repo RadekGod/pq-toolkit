@@ -1,4 +1,4 @@
-# Web aplication
+# Web application
 
 ## Deployment
    - Go to `src/deployments/flavor/[flavor]`

@@ -6,7 +6,6 @@ perceptual qualities of audio.
 Official documentation available in the link below.
 [PQ-Toolkit Documentation](https://radekgod.github.io/pq-toolkit/) 
 
-
 ## Project for course WIMU 23Z
 
 Project members:
