@@ -7,6 +7,7 @@ The main goal was to create a toolkit that allows to perform [_AB_](https://en.w
 
 ## Project structure
 This project consist of 2 main parts: 
+
 - Python module, 
 - web application testing platform.
 
