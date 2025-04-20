@@ -45,4 +45,4 @@ Stage: `make start-dev` on Windows OS
 
 Reason: in `prestart.sh` there tends to be a problem with file encoding, therefore `\r` sign is artificially added at the end of the `#! /usr/bin/env bash` line.
 
-Solution: ensure that thereis no `\r` sign at the end of the line (easiest way is to simply delete the sign).
+Solution: ensure that there is no `\r` sign at the end of the line (easiest way is to simply delete the sign).
