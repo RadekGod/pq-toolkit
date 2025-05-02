@@ -184,8 +184,11 @@ const AbEditor = ({
         <input
           className="rounded outline-0 border-2 bg-gray-50 border-gray-300 dark:bg-gray-800 dark:border-gray-500 text-black dark:text-white w-full"
           value={newQuestion}
-          onChange={(e) => {
-            setNewQuestion(e.target.value);
+          onChange={(e) => setNewQuestion(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleAddQuestion();
+            }
           }}
         />
         <button

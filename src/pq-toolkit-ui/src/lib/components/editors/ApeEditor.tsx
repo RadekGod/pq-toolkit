@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import DeleteAxisComp from '../form/deleteAxisComp';
+import { useToast, ToastType } from '@/lib/contexts/ToastContext';
 
 const ApeEditor = ({
   currentTest,
@@ -29,6 +30,33 @@ const ApeEditor = ({
 }): JSX.Element => {
   const [newQuestion, setNewQuestion] = useState('');
   const [sampleTest, setSampleTest] = useState<Sample[]>(currentTest.samples);
+  const { addToast } = useToast();
+  
+  const handleAddAxis = () => {
+    if (newQuestion.length === 0) {
+      addToast('Axis label cannot be empty', ToastType.WARNING);
+      return;
+    }
+  
+    if (currentTest.axis?.some((q) => q.text === newQuestion)) {
+      addToast('This axis already exists', ToastType.WARNING);
+      return;
+    }
+  
+    const updatedAxis = currentTest.axis != null
+      ? [...currentTest.axis, { questionId: newQuestion, text: newQuestion }]
+      : [{ questionId: newQuestion, text: newQuestion }];
+  
+    const updatedTest = {
+      ...currentTest,
+      axis: updatedAxis
+    };
+  
+    setCurrentTest(updatedTest);
+    setNewQuestion('');
+    addToast('Axis added successfully', ToastType.SUCCESS);
+  };
+
   return (
     <div className="w-full">
       <h4 className="font-semibold text-sm lg:text-base mb-1 mt-3">Samples</h4>
@@ -113,8 +141,11 @@ const ApeEditor = ({
         <input
           className="rounded outline-0 border-2 bg-gray-50 border-gray-300 dark:bg-gray-800 dark:border-gray-500 text-black dark:text-white w-full"
           value={newQuestion}
-          onChange={(e) => {
-            setNewQuestion(e.target.value);
+          onChange={(e) => setNewQuestion(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleAddAxis();
+            }
           }}
         />
         <button

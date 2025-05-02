@@ -181,30 +181,43 @@ const AddExperimentWidget = ({
 }): JSX.Element => {
   const [newExperimentName, setNewExperimentName] = useState('');
 
+  const handleAdd = () => {
+    if (
+      newExperimentName.length === 0 ||
+      experiments.includes(newExperimentName)
+    ) {
+      return;
+    }
+
+    addNewExperimentFetch(newExperimentName, addExperimentSchema)
+      .then(async () => {
+        try {
+          await refreshPage();
+        } catch (error) {
+          console.error(error);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
+    setNewExperimentName('');
+  };
+
   return (
     <div className="flex items-center z-10 mt-4 w-full">
       <input
         className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 dark:text-white text-black w-full"
-        onChange={(e) => {
-          setNewExperimentName(e.target.value)
+        onChange={(e) => setNewExperimentName(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleAdd();
+          }
         }}
         value={newExperimentName}
       />
       <button
-        onClick={() => {
-          addNewExperimentFetch(newExperimentName, addExperimentSchema)
-            .then(async () => {
-              try {
-                await refreshPage();
-              } catch (error) {
-                console.error(error);
-              }
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-          setNewExperimentName('');
-        }}
+        onClick={handleAdd}
         disabled={
           newExperimentName.length === 0 ||
           experiments.includes(newExperimentName)
@@ -216,6 +229,7 @@ const AddExperimentWidget = ({
     </div>
   );
 };
+
 
 const LoginSwitch = (): JSX.Element => {
   const {
