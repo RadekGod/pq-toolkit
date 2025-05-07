@@ -9,12 +9,12 @@
       "type": "AB",
       "samples": [
         {
-          "sampleId": "file_sample_5.mp3",
-          "assetPath": "file_sample_5.mp3"
+          "sampleId": "file-sample-5.mp3",
+          "assetPath": "file-sample-5.mp3"
         },
         {
-          "sampleId": "file_sample_700.mp3",
-          "assetPath": "file_sample_700.mp3"
+          "sampleId": "file-sample-700.mp3",
+          "assetPath": "file-sample-700.mp3"
         }
       ],
       "questions": [
@@ -47,12 +47,12 @@
       "type": "ABX",
       "samples": [
         {
-          "sampleId": "file_sample_5.mp3",
-          "assetPath": "file_sample_5.mp3"
+          "sampleId": "file-sample-5.mp3",
+          "assetPath": "file-sample-5.mp3"
         },
         {
-          "sampleId": "file_sample_700.mp3",
-          "assetPath": "file_sample_700.mp3"
+          "sampleId": "file-sample-700.mp3",
+          "assetPath": "file-sample-700.mp3"
         }
       ],
       "questions": [
@@ -71,8 +71,8 @@
       "type": "APE",
       "samples": [
         {
-          "sampleId": "file_sample_5.mp3",
-          "assetPath": "file_sample_5.mp3"
+          "sampleId": "file-sample-5.mp3",
+          "assetPath": "file-sample-5.mp3"
         },
         {
           "sampleId": "sample-12s.mp3",
@@ -99,12 +99,12 @@
       "type": "MUSHRA",
       "reference": {
         "sampleId": "ref",
-        "assetPath": "file_sample_5.mp3"
+        "assetPath": "file-sample-5.mp3"
       },
       "anchors": [
         {
-          "sampleId": "file_sample_700.mp3",
-          "assetPath": "file_sample_700.mp3"
+          "sampleId": "file-sample-700.mp3",
+          "assetPath": "file-sample-700.mp3"
         }
       ],
       "samples": [

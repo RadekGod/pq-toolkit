@@ -122,15 +122,12 @@ export const addNewExperimentFetch = async <T>(
   return parsed;
 };
 
-export const setUpExperimentFetch = async <T>(
-  experimentName: string,
-  experimentJSON: ExperimentSetup,
-  schema: z.Schema<T>
-): Promise<T> => {
-  const formData = new FormData()
-  const jsonBlob = new Blob([JSON.stringify(experimentJSON)], {
-    type: 'application/json'
-  });
+export const setUpExperimentFetch = async <T>(experimentName: string, experimentJSON: ExperimentSetup, schema: z.Schema<T>): Promise<T> => {
+  const formData = new FormData();
+  console.log('experimentJSON', experimentJSON);
+  console.log('experimentName', experimentName);
+  console.log('schema', schema);
+  const jsonBlob = new Blob([JSON.stringify(experimentJSON)], {type: 'application/json'});
   formData.append('file', jsonBlob, 'setup.json');
 
   const response = await fetch(`/api/v1/experiments/${experimentName}`, {
@@ -141,12 +138,14 @@ export const setUpExperimentFetch = async <T>(
     },
     body: formData
   });
-  if (!response.ok)
+  if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
 
   const data = await response.json();
+  console.log('data', data);
   const parsed = schema.parse(data);
-
+  console.log('parsed response', parsed);
   return parsed;
 };
 

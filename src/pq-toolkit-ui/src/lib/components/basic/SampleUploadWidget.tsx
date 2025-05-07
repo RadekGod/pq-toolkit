@@ -28,6 +28,49 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
     const [isDragging, setIsDragging] = useState(false);
     const { addToast } = useToast();
 
+    const handleSubmitSamples = async (): Promise<void> => {
+        try {
+            const formData = new FormData();
+
+            uploadedSamples.forEach((sample) => {
+                const file = sample.assetPath instanceof File ? sample.assetPath : new File([], sample.name);
+                formData.append('files', file);
+                formData.append('titles', sample.name);
+            });
+
+            selectedSamples.forEach((id) => {
+                formData.append('sample_ids', id.toString());
+            });
+
+            const response = await fetch(`/api/v1/experiments/${experimentName}/samples/v2`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to submit samples: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('Samples submitted successfully:', result);
+
+            const newSamples = result.asset_path.map((path: string) => ({
+                name: path.split('/').pop() || path,
+                assetPath: path,
+            }));
+
+            addToast('Samples uploaded successfully!', ToastType.SUCCESS);
+            onSamplesSubmitted(newSamples);
+            onClose();
+        } catch (error) {
+            console.error('Error submitting samples:', error);
+            addToast(error instanceof Error ? error.message : 'Failed to upload samples', ToastType.ERROR);
+        }
+    };
+
     useEffect(() => {
         if (apiData?.samples) {
             setSortedSamples(
@@ -38,6 +81,19 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
             );
         }
     }, [apiData]);
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Enter") {
+                handleSubmitSamples();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [handleSubmitSamples]);
 
     const handleSampleToggle = (sampleId: number): void => {
         setSelectedSamples((prev) =>
@@ -84,49 +140,6 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
         }
     }, [addToast]);
 
-    const handleSubmitSamples = async (): Promise<void> => {
-        try {
-            const formData = new FormData();
-
-            uploadedSamples.forEach((sample) => {
-                const file = sample.assetPath instanceof File ? sample.assetPath : new File([], sample.name);
-                formData.append('files', file);
-                formData.append('titles', sample.name);
-            });
-
-            selectedSamples.forEach((id) => {
-                formData.append('sample_ids', id.toString());
-            });
-
-            const response = await fetch(`/api/v1/experiments/${experimentName}/samples/v2`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to submit samples: ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            console.log('Samples submitted successfully:', result);
-
-            const newSamples = result.asset_path.map((path: string) => ({
-                name: path.split('/').pop() || path,
-                assetPath: path,
-            }));
-
-            addToast('Samples uploaded successfully!', ToastType.SUCCESS);
-            onSamplesSubmitted(newSamples);
-            onClose();
-        } catch (error) {
-            console.error('Error submitting samples:', error);
-            addToast(error instanceof Error ? error.message : 'Failed to upload samples', ToastType.ERROR);
-        }
-    };
-
     return (
         <div
             className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center"
@@ -145,12 +158,12 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
                         {uploadedSamples.map((sample, idx) => (
                             <div
                                 key={idx}
-                                className="flex items-center justify-between bg-white/90 dark:bg-black/50 p-3 rounded-md shadow-sm"
+                                className="flex flex-col items-start bg-white/90 dark:bg-black/50 p-4 rounded-md shadow-sm space-y-2"
                             >
-                                <span className="text-sm font-medium text-gray-900 dark:text-white w-2/3">
+                                <span className="text-sm font-medium text-gray-900 dark:text-white">
                                     {sample.name}
                                 </span>
-                                <audio controls className="w-1/3">
+                                <audio controls className="w-full rounded-md">
                                     <source
                                         src={typeof sample.assetPath === 'string' ? sample.assetPath : URL.createObjectURL(sample.assetPath)}
                                         type="audio/mpeg"
@@ -258,3 +271,4 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
 };
 
 export default SampleUploadWidget;
+

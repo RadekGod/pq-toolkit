@@ -20,11 +20,7 @@ const AbEditor = ({
   setSetup
 }: {
   currentTest: ABTest
-  setCurrentTest: React.Dispatch<
-    React.SetStateAction<
-      ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest
-    >
-  >
+  setCurrentTest: React.Dispatch<React.SetStateAction<ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest>>
   fileList: string[]
   setSetup: React.Dispatch<React.SetStateAction<ExperimentSetup>>
 }): JSX.Element => {
@@ -47,13 +43,7 @@ const AbEditor = ({
       });
       if (foundJSON !== undefined) {
         setSampleTest((oldarray) =>
-          oldarray.filter(
-            (sample) =>
-              ![foundJSON.assetPath].includes(
-                sample.assetPath
-              )
-          )
-        );
+          oldarray.filter((sample) => ![foundJSON.assetPath].includes(sample.assetPath)));
         addToast(`Removed sample: ${assetPath}`, ToastType.INFO);
       }
     }
@@ -239,10 +229,13 @@ const AbEditor = ({
               addToast('Please add at least one question', ToastType.WARNING);
               return;
             }
-            setCurrentTest({
-              ...currentTest,
-              samples: sampleTest
-            });
+            console.log('currentTest:', currentTest);
+            console.log('sampleTest:', sampleTest);
+            setCurrentTest(prevTest => ({
+              ...prevTest,
+              samples: [...sampleTest]
+            }));
+            console.log('currentTest po zmianie:', currentTest);
             addToast('Test configuration saved', ToastType.SUCCESS);
           }}
         >

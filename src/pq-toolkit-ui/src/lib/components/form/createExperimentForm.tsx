@@ -35,6 +35,9 @@ const CreateExperimentForm = ({
         let isSubscribed = true;
         setupLoadedRef.current = false;
 
+        setSetupUploadedFlag(false);
+        setSetupError(null);
+
         getExperimentFetch(selectedExperiment, ExperimentSetupSchema)
             .then((response) => {
                 if (isSubscribed) {
@@ -55,7 +58,6 @@ const CreateExperimentForm = ({
                         tests: []
                     });
                     if (!setupLoadedRef.current) {
-                        addToast('Created new experiment setup', ToastType.INFO);
                         setupLoadedRef.current = true;
                     }
                 }
@@ -89,9 +91,7 @@ const CreateExperimentForm = ({
         endText: '',
         tests: []
     });
-    const [currentTest, setCurrentTest] = useState<
-        ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest
-    >({
+    const [currentTest, setCurrentTest] = useState<ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest>({
         testNumber: -1,
         type: 'AB',
         samples: [],
@@ -228,11 +228,7 @@ const CreateExperimentForm = ({
 
     const handleSave = async (): Promise<void> => {
         try {
-            const response = await setUpExperimentFetch(
-                selectedExperiment,
-                setup,
-                setUpExperimentSchema
-            );
+            const response = await setUpExperimentFetch(selectedExperiment, setup, setUpExperimentSchema);
             addToast('Experiment setup saved successfully', ToastType.SUCCESS);
             return response;
         } catch (error) {
@@ -681,7 +677,7 @@ const CreateExperimentForm = ({
                                             fileList={fileList}
                                             setSetup={setSetup}
                                         />
-                                    )
+                                    );
                                 case 'APE':
                                     return (
                                         <ApeEditor
@@ -703,3 +699,4 @@ const CreateExperimentForm = ({
 };
 
 export default CreateExperimentForm;
+
