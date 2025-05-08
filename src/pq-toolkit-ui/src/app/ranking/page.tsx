@@ -3,7 +3,7 @@
 import Header from '@/lib/components/basic/header';
 import Blobs from '@/lib/components/basic/blobs';
 import useSWR from 'swr';
-import {FaTrash} from 'react-icons/fa';
+import {FaTrash, FaCloudUploadAlt, FaMusic} from 'react-icons/fa';
 import AudioPlayer from '@/lib/components/player/audioplayer';
 import Loading from '../loading';
 import {
@@ -14,6 +14,7 @@ import {
 import {validateApiData} from '@/core/apiHandlers/clientApiHandler';
 import {useState, useEffect} from 'react';
 import {SamplesListSchema, type SampleData, type UserData} from "@/lib/schemas/apiResults";
+import { useToast, ToastType } from '@/lib/contexts/ToastContext';
 
 const RankingPage = (): JSX.Element => {
     const {data: userData} = useSWR<UserData>('/api/v1/auth/user', userFetch);
@@ -26,6 +27,8 @@ const RankingPage = (): JSX.Element => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null);
     const [showUploadWidget, setShowUploadWidget] = useState(false);
     const [uploadedSamples, setUploadedSamples] = useState<{ name: string; assetPath: File }[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const { addToast } = useToast();
 
     useEffect(() => {
         if (apiData?.samples) {
@@ -86,9 +89,10 @@ const RankingPage = (): JSX.Element => {
 
             setUploadedSamples([]);
             await handleSendSamples();
+            addToast('Samples uploaded successfully!', ToastType.SUCCESS);
         } catch (error) {
             console.error('Error uploading files:', error);
-            alert('Failed to upload files. Please try again later.');
+            addToast('Failed to upload files. Please try again later.', ToastType.ERROR);
         }
     };
 
@@ -107,16 +111,25 @@ const RankingPage = (): JSX.Element => {
             }
 
             setSortedSamples((prevSamples) => prevSamples.filter((sample) => sample.sampleId !== sampleId));
+            addToast('Sample deleted successfully!', ToastType.SUCCESS);
         } catch (error) {
             console.error('Error deleting sample:', error);
-            alert('Failed to delete sample. Please try again.');
+            addToast('Failed to delete sample. Please try again.', ToastType.ERROR);
         }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const files = e.target.files;
         if (files) {
-            const newSamples = Array.from(files).map((file) => ({
+            const validFiles = Array.from(files).filter((file) => {
+                if (file.size > 6 * 1024 * 1024) {
+                    addToast(`File "${file.name}" exceeds the maximum size of 6MB.`, ToastType.WARNING);
+                    return false;
+                }
+                return true;
+            });
+
+            const newSamples = validFiles.map((file) => ({
                 name: file.name,
                 assetPath: file,
             }));
@@ -136,7 +149,7 @@ const RankingPage = (): JSX.Element => {
             handleWidgetClose();
         } catch (error) {
             console.error('Error refreshing samples:', error);
-            alert('Failed to refresh the sample list. Please try again.');
+            addToast('Failed to refresh the sample list. Please try again.', ToastType.ERROR);
         }
     };
 
@@ -157,7 +170,7 @@ const RankingPage = (): JSX.Element => {
             };
 
             if (ratedSample.rating === null) {
-                alert('Please select a rating before submitting.');
+                addToast('Please select a rating before submitting.', ToastType.WARNING);
                 return;
             }
 
@@ -170,8 +183,10 @@ const RankingPage = (): JSX.Element => {
 
             const updatedSamples = await fetchSamples();
             setSortedSamples(updatedSamples.samples);
+            addToast('Feedback submitted successfully!', ToastType.SUCCESS);
         } catch (error) {
             console.error('Error submitting feedback:', error);
+            addToast('Failed to submit feedback. Please try again.', ToastType.ERROR);
         }
     };
 
@@ -193,6 +208,51 @@ const RankingPage = (): JSX.Element => {
         if (sortOrder === 'asc') return '▲';
         if (sortOrder === 'desc') return '▼';
         return '▲▼';
+    };
+
+    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>): void => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>): void => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>): void => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const files = Array.from(e.dataTransfer.files);
+        const audioFiles = files.filter(file => file.type.startsWith('audio/'));
+
+        const validFiles = audioFiles.filter((file) => {
+            if (file.size > 6 * 1024 * 1024) {
+                addToast(`File "${file.name}" exceeds the maximum size of 6MB.`, ToastType.WARNING);
+                return false;
+            }
+            return true;
+        });
+
+        if (validFiles.length > 0) {
+            const newSamples = validFiles.map((file) => ({
+                name: file.name,
+                assetPath: file,
+            }));
+            setUploadedSamples((prev) => [...prev, ...newSamples]);
+            addToast(`Successfully added ${validFiles.length} audio file(s)`, ToastType.SUCCESS);
+        } else if (files.length > 0) {
+            addToast('Please drop only audio files.', ToastType.WARNING);
+        }
     };
 
     return (
@@ -290,7 +350,43 @@ const RankingPage = (): JSX.Element => {
                         <h3 className="text-xl font-bold mb-4 text-center text-gray-900 dark:text-white">
                             Upload Samples
                         </h3>
-                        <div className="space-y-4 w-full">
+                        <div
+                            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8 transition-colors duration-200 ${
+                                isDragging
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                    : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500'
+                            }`}
+                            onDragEnter={handleDragEnter}
+                            onDragLeave={handleDragLeave}
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                        >
+                            <FaCloudUploadAlt
+                                className={`w-12 h-12 mb-4 ${
+                                    isDragging ? 'text-blue-500' : 'text-gray-400'
+                                }`}
+                            />
+                            <p className="text-lg font-medium text-center mb-2 dark:text-white">
+                                {isDragging ? 'Drop audio files here' : 'Drag & drop audio files here'}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">
+                                or
+                            </p>
+                            <label className="cursor-pointer">
+                                <input
+                                    type="file"
+                                    accept="audio/*"
+                                    multiple
+                                    className="hidden"
+                                    onChange={handleFileChange}
+                                />
+                                <span className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+                                    <FaMusic className="mr-2" />
+                                    Browse Audio Files
+                                </span>
+                            </label>
+                        </div>
+                        <div className="space-y-4 w-full mt-4">
                             {uploadedSamples.map((sample, idx) => (
                                 <div
                                     key={idx}
@@ -308,15 +404,6 @@ const RankingPage = (): JSX.Element => {
                                     </audio>
                                 </div>
                             ))}
-                            <div className="flex items-center space-x-4">
-                                <input
-                                    type="file"
-                                    accept="audio/mpeg"
-                                    multiple
-                                    onChange={handleFileChange}
-                                    className="py-3 px-6 w-full bg-gray-100 dark:bg-black/50 text-black dark:text-white border border-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-black/50 shadow-sm transition-all cursor-pointer"
-                                />
-                            </div>
                         </div>
                         <button
                             onClick={handleSubmitFiles}
@@ -338,3 +425,4 @@ const RankingPage = (): JSX.Element => {
 };
 
 export default RankingPage;
+

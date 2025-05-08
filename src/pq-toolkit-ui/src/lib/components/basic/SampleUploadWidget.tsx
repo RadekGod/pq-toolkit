@@ -127,18 +127,45 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
 
         const files = Array.from(e.dataTransfer.files);
         const audioFiles = files.filter(file => file.type.startsWith('audio/'));
-        
-        if (audioFiles.length > 0) {
-            const newSamples = audioFiles.map((file) => ({
+
+        const validFiles = audioFiles.filter((file) => {
+            if (file.size > 6 * 1024 * 1024) {
+                addToast(`File "${file.name}" exceeds the maximum size of 6MB.`, ToastType.WARNING);
+                return false;
+            }
+            return true;
+        });
+
+        if (validFiles.length > 0) {
+            const newSamples = validFiles.map((file) => ({
                 name: file.name,
                 assetPath: file,
             }));
             setUploadedSamples((prev) => [...prev, ...newSamples]);
-            addToast(`Successfully added ${audioFiles.length} audio file(s)`, ToastType.SUCCESS);
+            addToast(`Successfully added ${validFiles.length} audio file(s)`, ToastType.SUCCESS);
         } else if (files.length > 0) {
             addToast('Please drop only audio files', ToastType.WARNING);
         }
     }, [addToast]);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+        const files = e.target.files;
+        if (files) {
+            const validFiles = Array.from(files).filter((file) => {
+                if (file.size > 6 * 1024 * 1024) {
+                    addToast(`File "${file.name}" exceeds the maximum size of 6MB.`, ToastType.WARNING);
+                    return false;
+                }
+                return true;
+            });
+
+            const newSamples = validFiles.map((file) => ({
+                name: file.name,
+                assetPath: file,
+            }));
+            setUploadedSamples((prev) => [...prev, ...newSamples]);
+        }
+    };
 
     return (
         <div
@@ -198,16 +225,7 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
                                     accept="audio/*"
                                     multiple
                                     className="hidden"
-                                    onChange={(e) => {
-                                        const files = e.target.files;
-                                        if (files) {
-                                            const newSamples = Array.from(files).map((file) => ({
-                                                name: file.name,
-                                                assetPath: file,
-                                            }));
-                                            setUploadedSamples((prev) => [...prev, ...newSamples]);
-                                        }
-                                    }}
+                                    onChange={handleFileChange}
                                 />
                                 <span className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
                                     <FaMusic className="mr-2" />
@@ -271,4 +289,3 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
 };
 
 export default SampleUploadWidget;
-

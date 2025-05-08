@@ -205,31 +205,41 @@ const AddExperimentWidget = ({
   };
 
   return (
-    <div className="flex items-center z-10 mt-4 w-full">
-      <input
-        className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 dark:text-white text-black w-full"
-        onChange={(e) => setNewExperimentName(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            handleAdd();
+    <div className="flex flex-col items-center z-10 mt-4 w-full">
+      <div className="flex items-center w-full">
+        <input
+          className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 dark:text-white text-black w-full"
+          onChange={(e) => setNewExperimentName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleAdd();
+            }
+          }}
+          value={newExperimentName}
+        />
+        <button
+          onClick={handleAdd}
+          disabled={
+            newExperimentName.length === 0 ||
+            experiments.includes(newExperimentName)
           }
-        }}
-        value={newExperimentName}
-      />
-      <button
-        onClick={handleAdd}
-        disabled={
-          newExperimentName.length === 0 ||
-          experiments.includes(newExperimentName)
-        }
-        className="flex items-center text-sm disabled:bg-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400 bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-110 duration-300 disabled:transform-none ease-in-out rounded-xl p-xxs ml-4 text-white"
-      >
-        <FaPlus />
-      </button>
+          className="flex items-center text-sm disabled:bg-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400 bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-110 duration-300 disabled:transform-none ease-in-out rounded-xl p-xxs ml-4 text-white"
+        >
+          <FaPlus />
+        </button>
+      </div>
+      <div className="mt-4 text-sm md:text-base text-gray-600 dark:text-gray-300">
+        First time?{' '}
+        <a
+          href="/admin/guide"
+          className="text-blue-500 dark:text-blue-400 hover:underline"
+        >
+          Check administrator guide
+        </a>
+      </div>
     </div>
   );
 };
-
 
 const LoginSwitch = (): JSX.Element => {
   const {
@@ -259,3 +269,4 @@ const LoginSwitch = (): JSX.Element => {
 };
 
 export default LoginSwitch;
+

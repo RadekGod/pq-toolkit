@@ -221,6 +221,10 @@ const AbEditor = ({
         <button
           className="px-5 sm:px-8 py-2 bg-blue-400 dark:bg-blue-500 text-white font-semibold rounded-lg shadow-sm hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-105 duration-300 ease-in-out"
           onClick={() => {
+            const updatedTest = {
+              ...currentTest,
+              samples: sampleTest,
+            };
             if (sampleTest.length !== 2) {
               addToast('Please select exactly 2 samples', ToastType.WARNING);
               return;
@@ -229,13 +233,12 @@ const AbEditor = ({
               addToast('Please add at least one question', ToastType.WARNING);
               return;
             }
-            console.log('currentTest:', currentTest);
-            console.log('sampleTest:', sampleTest);
-            setCurrentTest(prevTest => ({
-              ...prevTest,
-              samples: [...sampleTest]
+            setSetup((oldSetup) => ({
+              ...oldSetup,
+              tests: oldSetup.tests.map((test) =>
+                test.testNumber === updatedTest.testNumber ? updatedTest : test
+              )
             }));
-            console.log('currentTest po zmianie:', currentTest);
             addToast('Test configuration saved', ToastType.SUCCESS);
           }}
         >
