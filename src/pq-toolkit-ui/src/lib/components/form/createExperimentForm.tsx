@@ -275,10 +275,25 @@ const CreateExperimentForm = ({
                 </div>
             </div>
             <div className="flex flex-col md:flex-row h-full space-y-6 md:space-y-0 md:space-x-6">
-                <div
-                    className="flex flex-col border-r-0 border-b-2 md:border-r-2 md:border-b-0 h-full w-full md:w-2/3 p-4">
-                    <h3 className="text-sm lg:text-base font-semibold -mb-5">Tests</h3>
-                    <div className="flex flex-col space-y-2 mb-6">
+                <div className="flex flex-col border-r-0 border-b-2 md:border-r-2 md:border-b-0 h-full w-full md:w-2/3 p-4">
+                    <h3 className="text-sm lg:text-base font-semibold mb-2">STEP 1 - SUBMIT SAMPLES</h3>
+                    <button
+                        onClick={() => {setShowUploadWidget(true);}}
+                        className="py-3 px-6 bg-blue-500 text-white rounded-md hover:bg-blue-400 transition-colors shadow-sm mb-4"
+                    >
+                        Add samples
+                    </button>
+                    {showUploadWidget && (
+                        <SampleUploadWidget
+                            experimentName={selectedExperiment}
+                            onClose={() => {setShowUploadWidget(false);}}
+                            onSamplesSubmitted={handleSamplesSubmitted}
+                        />
+                    )}
+                
+                    <h3 className="text-sm lg:text-base font-semibold mb-2 mt-8">STEP 2 - CREATE TESTS</h3>
+                    <h3 className="text-sm lg:text-base font-semibold -mb-5">Manually</h3>
+                    <div className="flex flex-col space-y-2 mb-4">
                         <button
                             aria-label="Add new test"
                             className="flex items-center self-end bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 text-white text-sm font-medium py-1 lg:py-2 px-1 lg:px-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-110"
@@ -301,8 +316,7 @@ const CreateExperimentForm = ({
                         </button>
                         {setup.tests.length === 0 ? (
                             <h3 className="text-sm font-medium text-pink-500 dark:text-pink-600">
-                                No tests available. Please upload the Experiment Setup or add
-                                new test.
+                                No tests have been created or uploaded yet.
                             </h3>
                         ) : (
                             setup.tests.map((test, index) => (
@@ -340,56 +354,13 @@ const CreateExperimentForm = ({
                             ))
                         )}
                     </div>
-                    <h4 className="font-semibold text-sm lg:text-base mb-2">
-                        Description
-                    </h4>
-                    <div className="flex items-center w-full mb-3">
-                        <input
-                            className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
-                            value={setup.description}
-                            onChange={(e) => {
-                                setSetup((oldSetup) => ({
-                                    ...oldSetup,
-                                    description: e.target.value
-                                }));
-                            }}
-                        />
-                    </div>
-                    <h4 className="font-semibold text-sm lg:text-base mb-2">
-                        End Credits
-                    </h4>
-                    <div className="flex items-center w-full mb-6">
-                        <input
-                            className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
-                            value={setup.endText}
-                            onChange={(e) => {
-                                setSetup((oldSetup) => ({
-                                    ...oldSetup,
-                                    endText: e.target.value
-                                }));
-                            }}
-                        />
-                    </div>
+
                     <div className="mt-auto">
-
-                        <div>
-                            <button
-                                onClick={() => {setShowUploadWidget(true);}}
-                                className="py-3 px-6 bg-blue-500 text-white rounded-md hover:bg-blue-400 transition-colors shadow-sm"
-                            >
-                                Add samples
-                            </button>
-                            {showUploadWidget && (
-                                <SampleUploadWidget
-                                    experimentName={selectedExperiment}
-                                    onClose={() => {setShowUploadWidget(false);}}
-                                    onSamplesSubmitted={handleSamplesSubmitted}
-                                />
-                            )}
-                        </div>
-
-                        <h4 className="font-semibold text-sm lg:text-base mb-2 mt-4">
-                            Upload Experiment Setup
+                        <h4 className="font-semibold text-sm lg:text-base mb-4 mt-2">
+                            OR
+                        </h4>
+                        <h4 className="font-semibold text-sm lg:text-base mb-2 mt-6">
+                            Upload test setup from file
                         </h4>
                         <div className="flex items-center justify-center w-full">
                             <label
@@ -484,6 +455,39 @@ const CreateExperimentForm = ({
                             </label>
                         </div>
                     </div>
+
+                    <h3 className="font-semibold text-sm lg:text-base mb-2 mt-12">STEP 3 (Optional)</h3>
+                    <h4 className="font-semibold text-sm lg:text-base mb-2">
+                        Experiment Description
+                    </h4>
+                    <div className="flex items-center w-full mb-3">
+                        <input
+                            className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
+                            value={setup.description}
+                            onChange={(e) => {
+                                setSetup((oldSetup) => ({
+                                    ...oldSetup,
+                                    description: e.target.value
+                                }));
+                            }}
+                        />
+                    </div>
+                    <h4 className="font-semibold text-sm lg:text-base mb-2">
+                        End Credits
+                    </h4>
+                    <div className="flex items-center w-full mb-6">
+                        <input
+                            className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
+                            value={setup.endText}
+                            onChange={(e) => {
+                                setSetup((oldSetup) => ({
+                                    ...oldSetup,
+                                    endText: e.target.value
+                                }));
+                            }}
+                        />
+                    </div>
+                    
                 </div>
                 {currentTest.testNumber === -1 ? (
                     <div/>
