@@ -19,6 +19,9 @@ import CreateExperimentForm from '@/lib/components/form/createExperimentForm';
 import DeleteButton from '@/lib/components/basic/deleteButton';
 import { TbLogout2 } from 'react-icons/tb';
 
+const MAX_EXPERIMENTS = 15;
+const MAX_EXPERIMENT_NAME_LENGTH = 50;
+
 const AdminPage = ({
   refreshAdminPage
 }: {
@@ -184,7 +187,9 @@ const AddExperimentWidget = ({
   const handleAdd = () => {
     if (
       newExperimentName.length === 0 ||
-      experiments.includes(newExperimentName)
+      newExperimentName.length > MAX_EXPERIMENT_NAME_LENGTH ||
+      experiments.includes(newExperimentName) ||
+      experiments.length >= MAX_EXPERIMENTS
     ) {
       return;
     }
@@ -216,12 +221,15 @@ const AddExperimentWidget = ({
             }
           }}
           value={newExperimentName}
+          maxLength={MAX_EXPERIMENT_NAME_LENGTH}
         />
         <button
           onClick={handleAdd}
           disabled={
             newExperimentName.length === 0 ||
-            experiments.includes(newExperimentName)
+            newExperimentName.length > MAX_EXPERIMENT_NAME_LENGTH ||
+            experiments.includes(newExperimentName) ||
+            experiments.length >= MAX_EXPERIMENTS
           }
           className="flex items-center text-sm disabled:bg-gray-400 dark:disabled:bg-gray-700 dark:disabled:text-gray-400 bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-110 duration-300 disabled:transform-none ease-in-out rounded-xl p-xxs ml-4 text-white"
         >
@@ -237,6 +245,11 @@ const AddExperimentWidget = ({
           Check administrator guide
         </a>
       </div>
+      {experiments.length >= MAX_EXPERIMENTS && (
+        <div className="mt-2 text-red-500 dark:text-red-400">
+          Maximum number of experiments reached.
+        </div>
+      )}
     </div>
   );
 };

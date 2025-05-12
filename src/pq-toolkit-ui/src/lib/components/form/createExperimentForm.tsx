@@ -301,8 +301,7 @@ const CreateExperimentForm = ({
                         </button>
                         {setup.tests.length === 0 ? (
                             <h3 className="text-sm font-medium text-pink-500 dark:text-pink-600">
-                                No tests available. Please upload the Experiment Setup or add
-                                new test.
+                                No tests available. Please upload the Experiment Setup or add new test.
                             </h3>
                         ) : (
                             setup.tests.map((test, index) => (
