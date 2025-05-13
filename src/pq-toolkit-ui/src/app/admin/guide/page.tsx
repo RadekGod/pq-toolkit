@@ -23,14 +23,18 @@ const Guide = (): JSX.Element => {
         <div className="relative mb-md ml-7 md:ml-20 mr-7 md:mr-20 p-1 md:p-8 mt-1 md:mt-2">
           <div className="text-center">
             <h2 className="text-xl md:text-2xl font-semibold mb-4">
-              Administrator's User Manual
+              This guide provides detailed instructions for experiment management, specifically designed for new users.
             </h2>
           </div>
 
           <h3 className="text-lg font-semibold mt-6">Adding an Experiment</h3>
           <p>
-            To add a new experiment, enter a name in the field next to the +
-            button, then confirm by clicking the button.
+            To add a new experiment, enter a name in the field next to the 
+            <span 
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white font-bold mx-2 leading-none">
+              +
+            </span> 
+            button, then confirm by clicking the button or pressing the Enter key.
           </p>
 
           <p>
@@ -40,55 +44,186 @@ const Guide = (): JSX.Element => {
             configured.
           </p>
 
-          <div className="flex justify-center my-4">
+          <div className="flex flex-col items-center my-1">
             <img
-              src="/guide_photos/Add_experiment.png"
+              src="/guide_photos/Add-exp.png"
               alt="Adding an experiment"
-              className="my-4"
+              className="my-1 rounded-md shadow-lg"
             />
+            <p className="text-sm text-center mt-0 italic text-gray-500 dark:text-gray-400">
+              Figure 1: The interface for adding new experiments.
+            </p>
           </div>
 
           <h3 className="text-lg font-semibold mt-6">Uploading Samples</h3>
           <p>
-            The first step in creating an experiment is uploading samples to the
-            system. Click the Add samples button to proceed. In the displayed
-            window, the user has two options: Upload samples or Available
-            samples.
+            The first step in creating an experiment is submitting samples that will be used in the experiment. As a user, there are two options available:
           </p>
+          <ul className="list-disc list-inside ml-4">
+            <li>Submit a new sample.</li>
+            <li>Use an already submitted sample.</li>
+          </ul>
           <p>
-            If the audio material required for the experiment is not already in
-            the database, upload it by selecting a file from your computer and
-            confirming the upload with the Submit Samples button. Successfully
-            uploaded files will appear in the right-hand column of the window
-            under Available Samples. Added samples can be previewed using the
-            built-in player. To include samples in the experiment, click the
-            Select button next to each desired track and confirm with Submit
-            Samples. The tracks are now associated with the experiment being
-            created.
+            To begin, click the 
+            <span 
+              className="inline-flex items-center justify-center px-2 py-[0.1rem] bg-blue-500 text-white rounded-md font-semibold ml-1 mr-1 text-sm leading-tight align-middle">
+              Add samples
+            </span>
+            button. A window will appear, allowing you to manage your sample selection.
           </p>
-
-          <div className="flex justify-center my-4">
+          <div className="flex flex-col items-center my-1">
             <img
-              src="/guide_photos/Add_sample.png"
+              src="/guide_photos/Add-sample.png"
               alt="Adding an experiment"
-              className="my-4"
+              className="my-1 rounded-md shadow-lg"
             />
+            <p className="text-sm text-center mt-1 italic text-gray-500 dark:text-gray-400">
+              Figure 2: The interface for submitting samples.
+            </p>
           </div>
+          <p className="mt-4">
+            If the audio material required for the experiment is not already in
+            the database, upload it by selecting a file from your computer (using
+            <span 
+              className="inline-flex items-center justify-center px-2 py-[0.1rem] bg-blue-500 text-white rounded-md font-semibold ml-1 mr-1 text-sm leading-tight align-middle">
+              Browse Audio Files
+            </span>
+            button).
+          </p>
+          <p className="mt-2"> 
+            Files that have already been successfully sumbitted are located in the right-hand column of the window
+            under <em>Available Samples</em> section. To include available samples in the experiment, click the
+            <span 
+              className="inline-flex items-center justify-center px-2 py-[0.1rem] bg-blue-500 text-white rounded-md font-semibold ml-1 mr-1 text-sm leading-tight align-middle">
+              Select
+            </span>
+            button next to each desired track. 
+          </p>
+          <p className="mt-2"> 
+            All samples can be previewed using the built-in player. 
+          </p>
+          <p className="mt-2">
+              Remember to <strong className="font-bold">ALWAYS</strong> finish process (no matter if you add new samples or use existing ones)
+              by clicking
+              <span 
+              className="inline-flex items-center justify-center px-2 py-[0.1rem] bg-blue-500 text-white rounded-md font-semibold ml-1 mr-1 text-sm leading-tight align-middle">
+              Sumbit Samples
+            </span>
+            button. Only then samples are associated with the experiment that is being created.
+          </p> 
 
           <h3 className="text-lg font-semibold mt-6">Constructing the Tests</h3>
           <p>
-            To add a test, click the + button next to the Tests label. A tile
+            To add the tests in your experiment, you can:
+          </p>
+          <ul className="list-disc list-inside ml-4">
+            <li>Create every test manually.</li>
+            <li>Upload a <em>.json</em> config file, containing the definitions of all tests.</li>
+          </ul>
+          <div className="flex flex-col items-center my-1">
+            <img
+              src="/guide_photos/Add-test.png"
+              alt="Adding an experiment"
+              className="my-1 rounded-md shadow-lg"
+            />
+            <p className="text-sm text-center mt-1 italic text-gray-500 dark:text-gray-400">
+              Figure 3: The interface for tests construction.
+            </p>
+          </div>
+          <p className="mt-2">
+            If you choose manual approach, click the 
+            <span 
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white font-bold mx-2 leading-none">
+              +
+            </span> 
+            button, inside the <em>CREATE TESTS</em> section. A tile
             will appear below, and clicking it opens a configuration window for
-            the test, where four test types are available: MUSHRA, AB, ABX, and
-            APE.
+            the test, where four test types are available: <em>MUSHRA, AB, ABX</em> and
+            <em> APE.</em>
+          </p>
+          <div className="flex flex-col items-center my-1">
+            <img
+              src="/guide_photos/Add-test-config.png"
+              alt="Adding an experiment"
+              className="my-1 rounded-md shadow-lg"
+            />
+            <p className="text-sm text-center mt-1 italic text-gray-500 dark:text-gray-400">
+              Figure 4: The interface for test configuration.
+            </p>
+          </div>
+          <p className="mt-2">
+              Remember to <strong className="font-bold">ALWAYS</strong> finish process of test creation by clicking
+              <span 
+              className="inline-flex items-center justify-center px-2 py-[0.1rem] bg-blue-500 text-white rounded-md font-semibold ml-1 mr-1 text-sm leading-tight align-middle">
+              Save
+            </span>
+            button.
+          </p> 
+          <p className="mt-2">
+            If you prefer not to create tests manually every time you setup new experiment, you may prepare a config file and upload
+            directly, also in <em>CREATE TESTS</em> section. We provide an example file here:{" "}
+            <a
+              href="https://github.com/RadekGod/pq-toolkit/blob/main/src/pq-toolkit-ui/public/examples/demo-1/setup.json"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 underline hover:text-blue-300"
+            >
+              example .json config file
+            </a>. 
+          </p>
+          <p className="mt-2">
+            If you wish to understand how each of the available tests work, please refer to:{" "}
+            <a
+              href="https://radekgod.github.io/pq-toolkit/getting-started/test-types-overview/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 underline hover:text-blue-300"
+            >
+              test types overview
+            </a>. 
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6">Optional steps</h3>
+          <p>
+            There is a possibility of adding opening and end credits for each experiment.
+          </p>
+          <div className="flex flex-col items-center my-1">
+            <img
+              src="/guide_photos/Add-optional.png"
+              alt="Adding an experiment"
+              className="my-1 rounded-md shadow-lg"
+            />
+            <p className="text-sm text-center mt-1 italic text-gray-500 dark:text-gray-400">
+              Figure 5: The interface for credits section.
+            </p>
+          </div>
+          <p className="mt-2"> 
+            This step is 100% optional, leaving both fields blank will not cause any error. 
           </p>
 
           <h3 className="text-lg font-semibold mt-6">Saving the Experiment</h3>
           <p>
-            To save an experiment and make it available to participants, click
-            the Floppy Disk icon in the top-right corner of the configuration
-            window.
+            After you have finished your experiment setup, remember to <strong className="font-bold">ALWAYS </strong> 
+            finish process by clicking <em>Floppy Disk</em> (save) icon and then <em>Cross</em> (window exit) icon.
+            Both icons are available in the top-right corner of the configuration
+            window. Only then experiment is fully available to the users.
           </p>
+
+          <h3 className="text-lg font-semibold mt-6">System limitations</h3>
+          <ul className="list-disc list-inside mt-2 space-y-1">
+            <li><strong>Maximum number of experiments:</strong> 15</li>
+            <li><strong>Maximum number of tests per experiment:</strong> 10</li>
+            <li><strong>Maximum file upload size:</strong> 6 MB</li>
+            <li>
+              <strong>Maximum string lengths:</strong>
+              <ul className="list-disc list-inside ml-6">
+                <li>Experiment name: 50 characters</li>
+                <li>Experiment Description: 200 characters</li>
+                <li>End credits: 100 characters</li>
+              </ul>
+            </li>
+            <li><strong>Maximum number of stored samples:</strong> 200</li>
+          </ul>
 
           <h3 className="text-lg font-semibold mt-6">
             Viewing Experiment Results
