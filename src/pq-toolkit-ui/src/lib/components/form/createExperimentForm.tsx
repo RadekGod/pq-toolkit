@@ -21,6 +21,10 @@ function generateRandomString(): string {
     return segments.join('-');
 }
 
+const MAX_TESTS = 10;
+const MAX_DESCRIPTION_LENGTH = 200;
+const MAX_END_TEXT_LENGTH = 100;
+
 const CreateExperimentForm = ({
                                   selectedExperiment,
                                   setSelectedExperiment
@@ -41,6 +45,13 @@ const CreateExperimentForm = ({
         getExperimentFetch(selectedExperiment, ExperimentSetupSchema)
             .then((response) => {
                 if (isSubscribed) {
+                    if (response.tests.length > MAX_TESTS) {
+                        addToast(
+                            `Experiment contains too many tests (max ${MAX_TESTS} allowed).`,
+                            ToastType.WARNING
+                        );
+                        response.tests = response.tests.slice(0, MAX_TESTS);
+                    }
                     setSetup(response);
                     if (!setupLoadedRef.current) {
                         addToast('Experiment setup loaded successfully', ToastType.SUCCESS);
@@ -136,6 +147,13 @@ const CreateExperimentForm = ({
                         addToast('Invalid setup file structure', ToastType.ERROR);
                     }
                     if (data !== null) {
+                        if (data.tests.length > MAX_TESTS) {
+                            addToast(
+                                `Experiment contains too many tests (max ${MAX_TESTS} allowed).`,
+                                ToastType.WARNING
+                            );
+                            data.tests = data.tests.slice(0, MAX_TESTS);
+                        }
                         data.tests.forEach((test) => {
                             const validationResult = validateTestSchema(test);
                             if (validationResult.validationError != null) {
@@ -227,6 +245,22 @@ const CreateExperimentForm = ({
     };
 
     const handleSave = async (): Promise<void> => {
+        if (setup.description.length > MAX_DESCRIPTION_LENGTH) {
+            addToast(
+                `Description exceeds maximum length of ${MAX_DESCRIPTION_LENGTH} characters.`,
+                ToastType.WARNING
+            );
+            return;
+        }
+
+        if (setup.endText.length > MAX_END_TEXT_LENGTH) {
+            addToast(
+                `End credits exceed maximum length of ${MAX_END_TEXT_LENGTH} characters.`,
+                ToastType.WARNING
+            );
+            return;
+        }
+
         try {
             const response = await setUpExperimentFetch(selectedExperiment, setup, setUpExperimentSchema);
             addToast('Experiment setup saved successfully', ToastType.SUCCESS);
@@ -235,6 +269,29 @@ const CreateExperimentForm = ({
             console.error('Error saving experiment:', error);
             addToast('Failed to save experiment setup', ToastType.ERROR);
         }
+    };
+
+    const handleAddTest = () => {
+        if (setup.tests.length >= MAX_TESTS) {
+            addToast(
+                `Maximum number of tests (${MAX_TESTS}) reached.`,
+                ToastType.WARNING
+            );
+            return;
+        }
+
+        setSetup((oldSetup) => ({
+            ...oldSetup,
+            tests: [
+                ...oldSetup.tests,
+                {
+                    testNumber: oldSetup.tests.length + 1,
+                    type: 'AB',
+                    samples: [],
+                    questions: []
+                }
+            ]
+        }));
     };
 
     return (
@@ -297,20 +354,7 @@ const CreateExperimentForm = ({
                         <button
                             aria-label="Add new test"
                             className="flex items-center self-end bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 text-white text-sm font-medium py-1 lg:py-2 px-1 lg:px-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-110"
-                            onClick={() => {
-                                setSetup((oldSetup) => ({
-                                    ...oldSetup,
-                                    tests: [
-                                        ...oldSetup.tests,
-                                        {
-                                            testNumber: oldSetup.tests.length + 1,
-                                            type: 'AB',
-                                            samples: [],
-                                            questions: []
-                                        }
-                                    ]
-                                }));
-                            }}
+                            onClick={handleAddTest}
                         >
                             <FaPlus/>
                         </button>
@@ -353,6 +397,11 @@ const CreateExperimentForm = ({
                                 </div>
                             ))
                         )}
+                        {setup.tests.length >= MAX_TESTS && (
+                            <div className="mt-2 text-red-500 dark:text-red-400">
+                                Maximum number of tests reached.
+                            </div>
+                        )}
                     </div>
 
                     <div className="mt-auto">
@@ -384,7 +433,7 @@ const CreateExperimentForm = ({
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
                                             strokeWidth="2"
-                                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5A5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                                         />
                                     </svg>
                                     <p className="mb-1 text-xs text-center text-gray-500 dark:text-gray-400">
@@ -464,6 +513,7 @@ const CreateExperimentForm = ({
                         <input
                             className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
                             value={setup.description}
+                            maxLength={MAX_DESCRIPTION_LENGTH}
                             onChange={(e) => {
                                 setSetup((oldSetup) => ({
                                     ...oldSetup,
@@ -479,6 +529,7 @@ const CreateExperimentForm = ({
                         <input
                             className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
                             value={setup.endText}
+                            maxLength={MAX_END_TEXT_LENGTH}
                             onChange={(e) => {
                                 setSetup((oldSetup) => ({
                                     ...oldSetup,

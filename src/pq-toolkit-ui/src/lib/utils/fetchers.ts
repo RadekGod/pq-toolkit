@@ -124,9 +124,6 @@ export const addNewExperimentFetch = async <T>(
 
 export const setUpExperimentFetch = async <T>(experimentName: string, experimentJSON: ExperimentSetup, schema: z.Schema<T>): Promise<T> => {
   const formData = new FormData();
-  console.log('experimentJSON', experimentJSON);
-  console.log('experimentName', experimentName);
-  console.log('schema', schema);
   const jsonBlob = new Blob([JSON.stringify(experimentJSON)], {type: 'application/json'});
   formData.append('file', jsonBlob, 'setup.json');
 
@@ -143,9 +140,7 @@ export const setUpExperimentFetch = async <T>(experimentName: string, experiment
   }
 
   const data = await response.json();
-  console.log('data', data);
   const parsed = schema.parse(data);
-  console.log('parsed response', parsed);
   return parsed;
 };
 

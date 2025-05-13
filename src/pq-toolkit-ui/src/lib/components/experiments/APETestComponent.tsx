@@ -23,7 +23,6 @@ const APETestComponent = ({
   setAnswer: (result: PartialResult<APEResult>) => void
   feedback: string
 }): JSX.Element => {
-  // console.log(initialValues)
   const { axis, samples } = testData;
   const selectedPlayerState = useState<number>(0);
   const [responses, setResponses] = useState(

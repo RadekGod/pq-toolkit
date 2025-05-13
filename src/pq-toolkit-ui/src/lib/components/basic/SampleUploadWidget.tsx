@@ -20,6 +20,8 @@ interface SampleUploadWidgetProps {
     onSamplesSubmitted: (newSamples: { name: string; assetPath: string }[]) => void;
 }
 
+const MAX_SAMPLES = 100;
+
 const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: SampleUploadWidgetProps): JSX.Element => {
     const {data: apiData, error, isLoading} = useSWR('/api/v1/samples', fetchSamples);
     const [sortedSamples, setSortedSamples] = useState<SampleData[]>([]);
@@ -29,6 +31,15 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
     const { addToast } = useToast();
 
     const handleSubmitSamples = async (): Promise<void> => {
+        const totalSamplesCount = uploadedSamples.length + selectedSamples.length + sortedSamples.length;
+        if (totalSamplesCount > MAX_SAMPLES) {
+            addToast(
+                `You cannot have more than ${MAX_SAMPLES} samples in total, including already uploaded samples.`,
+                ToastType.WARNING
+            );
+            return;
+        }
+
         try {
             const formData = new FormData();
 
@@ -55,7 +66,6 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
             }
 
             const result = await response.json();
-            console.log('Samples submitted successfully:', result);
 
             const newSamples = result.asset_path.map((path: string) => ({
                 name: path.split('/').pop() || path,
@@ -126,11 +136,29 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
         setIsDragging(false);
 
         const files = Array.from(e.dataTransfer.files);
+        const totalSamplesCount = uploadedSamples.length + sortedSamples.length + files.length;
+
+        if (totalSamplesCount > MAX_SAMPLES) {
+            addToast(
+                `You cannot have more than ${MAX_SAMPLES} samples in total, including already uploaded samples.`,
+                ToastType.WARNING
+            );
+            return;
+        }
+
         const audioFiles = files.filter(file => file.type.startsWith('audio/'));
 
         const validFiles = audioFiles.filter((file) => {
+            const fileName = file.name.toLowerCase();
             if (file.size > 6 * 1024 * 1024) {
                 addToast(`File "${file.name}" exceeds the maximum size of 6MB.`, ToastType.WARNING);
+                return false;
+            }
+
+            if (uploadedSamples.some((sample) => sample.name.toLowerCase() === fileName) ||
+                sortedSamples.some((sample) => sample.name.toLowerCase() === experimentName + '/' + fileName) ||
+                sortedSamples.some((sample) => sample.name.toLowerCase() === fileName)) {
+                addToast(`Sample "${file.name}" already exists.`, ToastType.WARNING);
                 return false;
             }
             return true;
@@ -143,17 +171,31 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
             }));
             setUploadedSamples((prev) => [...prev, ...newSamples]);
             addToast(`Successfully added ${validFiles.length} audio file(s)`, ToastType.SUCCESS);
-        } else if (files.length > 0) {
-            addToast('Please drop only audio files', ToastType.WARNING);
         }
-    }, [addToast]);
+    }, [addToast, uploadedSamples, sortedSamples]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const files = e.target.files;
         if (files) {
+            const totalSamplesCount = uploadedSamples.length + sortedSamples.length + Array.from(files).length;
+            if (totalSamplesCount > MAX_SAMPLES) {
+                addToast(
+                    `You cannot have more than ${MAX_SAMPLES} samples in total, including already uploaded samples.`,
+                    ToastType.WARNING
+                );
+                return;
+            }
+
             const validFiles = Array.from(files).filter((file) => {
+                const fileName = file.name.toLowerCase();
                 if (file.size > 6 * 1024 * 1024) {
                     addToast(`File "${file.name}" exceeds the maximum size of 6MB.`, ToastType.WARNING);
+                    return false;
+                }
+                if (uploadedSamples.some((sample) => sample.name.toLowerCase() === fileName) ||
+                    sortedSamples.some((sample) => sample.name.toLowerCase() === experimentName + '/' + fileName) ||
+                    sortedSamples.some((sample) => sample.name.toLowerCase() === fileName)) {
+                    addToast(`Sample "${file.name}" already exists.`, ToastType.WARNING);
                     return false;
                 }
                 return true;
@@ -163,6 +205,7 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
                 name: file.name,
                 assetPath: file,
             }));
+
             setUploadedSamples((prev) => [...prev, ...newSamples]);
         }
     };
@@ -299,3 +342,4 @@ const SampleUploadWidget = ({experimentName, onClose, onSamplesSubmitted}: Sampl
 };
 
 export default SampleUploadWidget;
+

@@ -122,8 +122,16 @@ const RankingPage = (): JSX.Element => {
         const files = e.target.files;
         if (files) {
             const validFiles = Array.from(files).filter((file) => {
+                const fileName = file.name.toLowerCase();
                 if (file.size > 6 * 1024 * 1024) {
                     addToast(`File "${file.name}" exceeds the maximum size of 6MB.`, ToastType.WARNING);
+                    return false;
+                }
+                if (
+                    uploadedSamples.some((sample) => sample.name.toLowerCase() === fileName) ||
+                    sortedSamples.some((sample) => sample.name.toLowerCase() === fileName)
+                ) {
+                    addToast(`Sample "${file.name}" already exists.`, ToastType.WARNING);
                     return false;
                 }
                 return true;
@@ -133,6 +141,7 @@ const RankingPage = (): JSX.Element => {
                 name: file.name,
                 assetPath: file,
             }));
+
             setUploadedSamples((prev) => [...prev, ...newSamples]);
         }
     };
@@ -236,8 +245,16 @@ const RankingPage = (): JSX.Element => {
         const audioFiles = files.filter(file => file.type.startsWith('audio/'));
 
         const validFiles = audioFiles.filter((file) => {
+            const fileName = file.name.toLowerCase();
             if (file.size > 6 * 1024 * 1024) {
                 addToast(`File "${file.name}" exceeds the maximum size of 6MB.`, ToastType.WARNING);
+                return false;
+            }
+            if (
+                uploadedSamples.some((sample) => sample.name.toLowerCase() === fileName) ||
+                sortedSamples.some((sample) => sample.name.toLowerCase() === fileName)
+            ) {
+                addToast(`Sample "${file.name}" already exists.`, ToastType.WARNING);
                 return false;
             }
             return true;
@@ -250,8 +267,6 @@ const RankingPage = (): JSX.Element => {
             }));
             setUploadedSamples((prev) => [...prev, ...newSamples]);
             addToast(`Successfully added ${validFiles.length} audio file(s)`, ToastType.SUCCESS);
-        } else if (files.length > 0) {
-            addToast('Please drop only audio files.', ToastType.WARNING);
         }
     };
 
@@ -409,7 +424,7 @@ const RankingPage = (): JSX.Element => {
                             onClick={handleSubmitFiles}
                             className="py-3 px-6 w-full bg-blue-500 text-white rounded-md mt-4 hover:bg-blue-400 transition-colors shadow-sm"
                         >
-                            Send Samples
+                            Submit Samples
                         </button>
                         <button
                             onClick={handleWidgetClose}
