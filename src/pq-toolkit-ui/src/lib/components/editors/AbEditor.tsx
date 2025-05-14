@@ -20,11 +20,7 @@ const AbEditor = ({
   setSetup
 }: {
   currentTest: ABTest
-  setCurrentTest: React.Dispatch<
-    React.SetStateAction<
-      ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest
-    >
-  >
+  setCurrentTest: React.Dispatch<React.SetStateAction<ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest>>
   fileList: string[]
   setSetup: React.Dispatch<React.SetStateAction<ExperimentSetup>>
 }): JSX.Element => {
@@ -47,13 +43,7 @@ const AbEditor = ({
       });
       if (foundJSON !== undefined) {
         setSampleTest((oldarray) =>
-          oldarray.filter(
-            (sample) =>
-              ![foundJSON.assetPath].includes(
-                sample.assetPath
-              )
-          )
-        );
+          oldarray.filter((sample) => ![foundJSON.assetPath].includes(sample.assetPath)));
         addToast(`Removed sample: ${assetPath}`, ToastType.INFO);
       }
     }
@@ -184,8 +174,11 @@ const AbEditor = ({
         <input
           className="rounded outline-0 border-2 bg-gray-50 border-gray-300 dark:bg-gray-800 dark:border-gray-500 text-black dark:text-white w-full"
           value={newQuestion}
-          onChange={(e) => {
-            setNewQuestion(e.target.value);
+          onChange={(e) => setNewQuestion(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleAddQuestion();
+            }
           }}
         />
         <button
@@ -228,6 +221,10 @@ const AbEditor = ({
         <button
           className="px-5 sm:px-8 py-2 bg-blue-400 dark:bg-blue-500 text-white font-semibold rounded-lg shadow-sm hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-105 duration-300 ease-in-out"
           onClick={() => {
+            const updatedTest = {
+              ...currentTest,
+              samples: sampleTest,
+            };
             if (sampleTest.length !== 2) {
               addToast('Please select exactly 2 samples', ToastType.WARNING);
               return;
@@ -236,10 +233,12 @@ const AbEditor = ({
               addToast('Please add at least one question', ToastType.WARNING);
               return;
             }
-            setCurrentTest({
-              ...currentTest,
-              samples: sampleTest
-            });
+            setSetup((oldSetup) => ({
+              ...oldSetup,
+              tests: oldSetup.tests.map((test) =>
+                test.testNumber === updatedTest.testNumber ? updatedTest : test
+              )
+            }));
             addToast('Test configuration saved', ToastType.SUCCESS);
           }}
         >

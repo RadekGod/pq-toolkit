@@ -21,6 +21,10 @@ function generateRandomString(): string {
     return segments.join('-');
 }
 
+const MAX_TESTS = 10;
+const MAX_DESCRIPTION_LENGTH = 200;
+const MAX_END_TEXT_LENGTH = 100;
+
 const CreateExperimentForm = ({
                                   selectedExperiment,
                                   setSelectedExperiment
@@ -35,9 +39,19 @@ const CreateExperimentForm = ({
         let isSubscribed = true;
         setupLoadedRef.current = false;
 
+        setSetupUploadedFlag(false);
+        setSetupError(null);
+
         getExperimentFetch(selectedExperiment, ExperimentSetupSchema)
             .then((response) => {
                 if (isSubscribed) {
+                    if (response.tests.length > MAX_TESTS) {
+                        addToast(
+                            `Experiment contains too many tests (max ${MAX_TESTS} allowed).`,
+                            ToastType.WARNING
+                        );
+                        response.tests = response.tests.slice(0, MAX_TESTS);
+                    }
                     setSetup(response);
                     if (!setupLoadedRef.current) {
                         addToast('Experiment setup loaded successfully', ToastType.SUCCESS);
@@ -55,7 +69,6 @@ const CreateExperimentForm = ({
                         tests: []
                     });
                     if (!setupLoadedRef.current) {
-                        addToast('Created new experiment setup', ToastType.INFO);
                         setupLoadedRef.current = true;
                     }
                 }
@@ -89,9 +102,7 @@ const CreateExperimentForm = ({
         endText: '',
         tests: []
     });
-    const [currentTest, setCurrentTest] = useState<
-        ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest
-    >({
+    const [currentTest, setCurrentTest] = useState<ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest>({
         testNumber: -1,
         type: 'AB',
         samples: [],
@@ -136,6 +147,13 @@ const CreateExperimentForm = ({
                         addToast('Invalid setup file structure', ToastType.ERROR);
                     }
                     if (data !== null) {
+                        if (data.tests.length > MAX_TESTS) {
+                            addToast(
+                                `Experiment contains too many tests (max ${MAX_TESTS} allowed).`,
+                                ToastType.WARNING
+                            );
+                            data.tests = data.tests.slice(0, MAX_TESTS);
+                        }
                         data.tests.forEach((test) => {
                             const validationResult = validateTestSchema(test);
                             if (validationResult.validationError != null) {
@@ -227,18 +245,53 @@ const CreateExperimentForm = ({
     };
 
     const handleSave = async (): Promise<void> => {
-        try {
-            const response = await setUpExperimentFetch(
-                selectedExperiment,
-                setup,
-                setUpExperimentSchema
+        if (setup.description.length > MAX_DESCRIPTION_LENGTH) {
+            addToast(
+                `Description exceeds maximum length of ${MAX_DESCRIPTION_LENGTH} characters.`,
+                ToastType.WARNING
             );
+            return;
+        }
+
+        if (setup.endText.length > MAX_END_TEXT_LENGTH) {
+            addToast(
+                `End credits exceed maximum length of ${MAX_END_TEXT_LENGTH} characters.`,
+                ToastType.WARNING
+            );
+            return;
+        }
+
+        try {
+            const response = await setUpExperimentFetch(selectedExperiment, setup, setUpExperimentSchema);
             addToast('Experiment setup saved successfully', ToastType.SUCCESS);
             return response;
         } catch (error) {
             console.error('Error saving experiment:', error);
             addToast('Failed to save experiment setup', ToastType.ERROR);
         }
+    };
+
+    const handleAddTest = () => {
+        if (setup.tests.length >= MAX_TESTS) {
+            addToast(
+                `Maximum number of tests (${MAX_TESTS}) reached.`,
+                ToastType.WARNING
+            );
+            return;
+        }
+
+        setSetup((oldSetup) => ({
+            ...oldSetup,
+            tests: [
+                ...oldSetup.tests,
+                {
+                    testNumber: oldSetup.tests.length + 1,
+                    type: 'AB',
+                    samples: [],
+                    questions: []
+                }
+            ]
+        }));
     };
 
     return (
@@ -279,34 +332,35 @@ const CreateExperimentForm = ({
                 </div>
             </div>
             <div className="flex flex-col md:flex-row h-full space-y-6 md:space-y-0 md:space-x-6">
-                <div
-                    className="flex flex-col border-r-0 border-b-2 md:border-r-2 md:border-b-0 h-full w-full md:w-2/3 p-4">
-                    <h3 className="text-sm lg:text-base font-semibold -mb-5">Tests</h3>
-                    <div className="flex flex-col space-y-2 mb-6">
+                <div className="flex flex-col border-r-0 border-b-2 md:border-r-2 md:border-b-0 h-full w-full md:w-2/3 p-4">
+                    <h3 className="text-sm lg:text-base font-semibold mb-2">STEP 1 - SUBMIT SAMPLES</h3>
+                    <button
+                        onClick={() => {setShowUploadWidget(true);}}
+                        className="py-3 px-6 bg-blue-500 text-white rounded-md hover:bg-blue-400 transition-colors shadow-sm mb-4"
+                    >
+                        Add samples
+                    </button>
+                    {showUploadWidget && (
+                        <SampleUploadWidget
+                            experimentName={selectedExperiment}
+                            onClose={() => {setShowUploadWidget(false);}}
+                            onSamplesSubmitted={handleSamplesSubmitted}
+                        />
+                    )}
+
+                    <h3 className="text-sm lg:text-base font-semibold mb-2 mt-8">STEP 2 - CREATE TESTS</h3>
+                    <h3 className="text-sm lg:text-base font-semibold -mb-5">Manually</h3>
+                    <div className="flex flex-col space-y-2 mb-4">
                         <button
                             aria-label="Add new test"
                             className="flex items-center self-end bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 text-white text-sm font-medium py-1 lg:py-2 px-1 lg:px-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-110"
-                            onClick={() => {
-                                setSetup((oldSetup) => ({
-                                    ...oldSetup,
-                                    tests: [
-                                        ...oldSetup.tests,
-                                        {
-                                            testNumber: oldSetup.tests.length + 1,
-                                            type: 'AB',
-                                            samples: [],
-                                            questions: []
-                                        }
-                                    ]
-                                }));
-                            }}
+                            onClick={handleAddTest}
                         >
                             <FaPlus/>
                         </button>
                         {setup.tests.length === 0 ? (
                             <h3 className="text-sm font-medium text-pink-500 dark:text-pink-600">
-                                No tests available. Please upload the Experiment Setup or add
-                                new test.
+                                No tests have been created or uploaded yet.
                             </h3>
                         ) : (
                             setup.tests.map((test, index) => (
@@ -343,57 +397,19 @@ const CreateExperimentForm = ({
                                 </div>
                             ))
                         )}
+                        {setup.tests.length >= MAX_TESTS && (
+                            <div className="mt-2 text-red-500 dark:text-red-400">
+                                Maximum number of tests reached.
+                            </div>
+                        )}
                     </div>
-                    <h4 className="font-semibold text-sm lg:text-base mb-2">
-                        Description
-                    </h4>
-                    <div className="flex items-center w-full mb-3">
-                        <input
-                            className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
-                            value={setup.description}
-                            onChange={(e) => {
-                                setSetup((oldSetup) => ({
-                                    ...oldSetup,
-                                    description: e.target.value
-                                }));
-                            }}
-                        />
-                    </div>
-                    <h4 className="font-semibold text-sm lg:text-base mb-2">
-                        End Credits
-                    </h4>
-                    <div className="flex items-center w-full mb-6">
-                        <input
-                            className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
-                            value={setup.endText}
-                            onChange={(e) => {
-                                setSetup((oldSetup) => ({
-                                    ...oldSetup,
-                                    endText: e.target.value
-                                }));
-                            }}
-                        />
-                    </div>
+
                     <div className="mt-auto">
-
-                        <div>
-                            <button
-                                onClick={() => {setShowUploadWidget(true);}}
-                                className="py-3 px-6 bg-blue-500 text-white rounded-md hover:bg-blue-400 transition-colors shadow-sm"
-                            >
-                                Add samples
-                            </button>
-                            {showUploadWidget && (
-                                <SampleUploadWidget
-                                    experimentName={selectedExperiment}
-                                    onClose={() => {setShowUploadWidget(false);}}
-                                    onSamplesSubmitted={handleSamplesSubmitted}
-                                />
-                            )}
-                        </div>
-
-                        <h4 className="font-semibold text-sm lg:text-base mb-2 mt-4">
-                            Upload Experiment Setup
+                        <h4 className="font-semibold text-sm lg:text-base mb-4 mt-2">
+                            OR
+                        </h4>
+                        <h4 className="font-semibold text-sm lg:text-base mb-2 mt-6">
+                            Upload test setup from file
                         </h4>
                         <div className="flex items-center justify-center w-full">
                             <label
@@ -417,7 +433,7 @@ const CreateExperimentForm = ({
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
                                             strokeWidth="2"
-                                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5A5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                                         />
                                     </svg>
                                     <p className="mb-1 text-xs text-center text-gray-500 dark:text-gray-400">
@@ -488,6 +504,41 @@ const CreateExperimentForm = ({
                             </label>
                         </div>
                     </div>
+
+                    <h3 className="font-semibold text-sm lg:text-base mb-2 mt-12">STEP 3 (Optional)</h3>
+                    <h4 className="font-semibold text-sm lg:text-base mb-2">
+                        Experiment Description
+                    </h4>
+                    <div className="flex items-center w-full mb-3">
+                        <input
+                            className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
+                            value={setup.description}
+                            maxLength={MAX_DESCRIPTION_LENGTH}
+                            onChange={(e) => {
+                                setSetup((oldSetup) => ({
+                                    ...oldSetup,
+                                    description: e.target.value
+                                }));
+                            }}
+                        />
+                    </div>
+                    <h4 className="font-semibold text-sm lg:text-base mb-2">
+                        End Credits
+                    </h4>
+                    <div className="flex items-center w-full mb-6">
+                        <input
+                            className="rounded outline-0 border-2 bg-gray-100 border-gray-300 dark:bg-gray-700 dark:border-gray-500 text-black dark:text-white w-full"
+                            value={setup.endText}
+                            maxLength={MAX_END_TEXT_LENGTH}
+                            onChange={(e) => {
+                                setSetup((oldSetup) => ({
+                                    ...oldSetup,
+                                    endText: e.target.value
+                                }));
+                            }}
+                        />
+                    </div>
+
                 </div>
                 {currentTest.testNumber === -1 ? (
                     <div/>
@@ -681,7 +732,7 @@ const CreateExperimentForm = ({
                                             fileList={fileList}
                                             setSetup={setSetup}
                                         />
-                                    )
+                                    );
                                 case 'APE':
                                     return (
                                         <ApeEditor
@@ -703,3 +754,4 @@ const CreateExperimentForm = ({
 };
 
 export default CreateExperimentForm;
+

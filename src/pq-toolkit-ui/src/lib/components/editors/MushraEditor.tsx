@@ -17,11 +17,7 @@ const MushraEditor = ({
   setSetup
 }: {
   currentTest: MUSHRATest
-  setCurrentTest: React.Dispatch<
-    React.SetStateAction<
-      ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest
-    >
-  >
+  setCurrentTest: React.Dispatch<React.SetStateAction<ABTest | ABXTest | FullABXTest | MUSHRATest | APETest | BaseTest>>
   fileList: string[];
   setSetup: React.Dispatch<React.SetStateAction<ExperimentSetup>>
 }): JSX.Element => {
