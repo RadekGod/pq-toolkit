@@ -106,10 +106,17 @@ const AdminExperimentsListWidget = ({
     experiments: string[];
     setExpandedExperiment: React.Dispatch<React.SetStateAction<string | null>>;
 }): JSX.Element => {
-    const downloadAllCSV = async (experimentName: string) => {
+    const [downloadMenuIdx, setDownloadMenuIdx] = useState<number | null>(null);
+
+    const downloadAll = (experimentName: string, format: 'csv' | 'pdf') => {
         const link = document.createElement('a');
-        link.href = `/api/v1/experiments/${experimentName}/download_csv`;
-        link.setAttribute('download', `${experimentName}_all_tests.zip`);
+        if (format === 'csv') {
+            link.href = `/api/v1/experiments/${experimentName}/download_csv`;
+            link.setAttribute('download', `${experimentName}_all_tests.zip`);
+        } else {
+            link.href = `/api/v1/experiments/${experimentName}/download_pdf`;
+            link.setAttribute('download', `${experimentName}_all_tests.pdf`);
+        }
         link.click();
     };
 
@@ -122,7 +129,7 @@ const AdminExperimentsListWidget = ({
                 {experiments.map((name, idx) => (
                     <li
                         key={idx}
-                        className="flex items-center justify-between whitespace-normal break-words"
+                        className="flex items-center justify-between whitespace-normal break-words relative"
                     >
                         <div
                             className="font-semibold text-white w-full bg-blue-400 dark:bg-blue-500 hover:bg-pink-500 dark:hover:bg-pink-600 transform hover:scale-105 duration-300 ease-in-out p-2 rounded-md cursor-pointer"
@@ -130,12 +137,33 @@ const AdminExperimentsListWidget = ({
                         >
                             {name}
                         </div>
-                        <button
-                            className="ml-4 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-2 rounded whitespace-nowrap"
-                            onClick={() => downloadAllCSV(name)}
+                        <div
+                            className="ml-4 relative"
+                            onMouseEnter={() => setDownloadMenuIdx(idx)}
+                            onMouseLeave={() => setDownloadMenuIdx(null)}
                         >
-                            Download results
-                        </button>
+                            <button
+                                className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-2 rounded whitespace-nowrap"
+                            >
+                                Download results
+                            </button>
+                            {downloadMenuIdx === idx && (
+                                <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg z-50">
+                                    <button
+                                        className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                        onClick={() => downloadAll(name, 'csv')}
+                                    >
+                                        CSV
+                                    </button>
+                                    <button
+                                        className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                                        onClick={() => downloadAll(name, 'pdf')}
+                                    >
+                                        PDF
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </li>
                 ))}
             </ul>
