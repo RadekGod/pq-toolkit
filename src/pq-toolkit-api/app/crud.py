@@ -26,6 +26,7 @@ from sqlalchemy.orm import subqueryload
 from sqlalchemy.sql import func
 
 
+
 class ExperimentNotFound(PqException):
     def __init__(self, experiment_name: str) -> None:
         super().__init__(f"Experiment {experiment_name} not found!", error_code=404)
@@ -192,9 +193,7 @@ def add_experiment_result(session: Session, experiment_name: str, result_list: d
     return get_experiment_tests_results(session, experiment_name, result_name)
 
 
-def add_test_results(
-        session: Session, results_data: dict, experiment: Experiment
-) -> str:
+def add_test_results(session: Session, results_data: dict, experiment: Experiment) -> str:
     results = results_data.get("results")
     if results is None:
         raise NoResultsData()
@@ -393,12 +392,6 @@ def prepare_csv_result(session: Session, result_dict: dict):
             assert all(isinstance(result, PqTestABResult) for result in result_dict["results"]), \
                 "Not all results are instances of PqTestABResult"
 
-            # csv_content = 'Test type,questionId,sampleId\n'
-            # for result in result_dict["results"]:
-            #     for selection in result.selections:
-            #         csv_content += f"{result_dict['test_type']}," \
-            #                        f"{selection.question_id}," \
-            #                        f"{selection.sample_id}\n"
             print(result_dict["results"])
             all_questions = sorted({
                 selection.question_id
@@ -406,56 +399,49 @@ def prepare_csv_result(session: Session, result_dict: dict):
                 for selection in result.selections
             })
 
-            # Budowanie nagłówka CSV
-            headers = ["Test name"] + [f"questionId_{i + 1},sampleId_{i + 1}" for i in range(len(all_questions))]
+            headers = ["Test name"] + [f"questionId_{i + 1},sampleId_{i + 1}" for i in range(len(all_questions))] + ["Feedback"]
             csv_content = ",".join(headers) + "\n"
 
-            # Budowanie wierszy CSV
             for result in result_dict["results"]:
                 row = [result_dict["test_type"]]
                 question_to_sample = {sel.question_id: sel.sample_id for sel in result.selections}
 
-                # Uzupełnianie wartości `Null` dla brakujących `question_id`
                 for question in all_questions:
                     sample = question_to_sample.get(question, "Null")
                     row.extend([question, sample])
 
+                row.append(getattr(result, "feedback", "") or "")
                 csv_content += ",".join(row) + "\n"
 
             return csv_content
 
         case "ABX":
-            # Sprawdzenie poprawności typu
             assert all(isinstance(result, PqTestABXResult) for result in result_dict["results"]), \
                 "Not all results are instances of PqTestABXResult"
             print(result_dict["results"])
-            # Zbiór wszystkich unikalnych `question_id` i ich kolejność
             all_questions = sorted({
                 selection.question_id
                 for result in result_dict["results"]
                 for selection in result.selections
             })
 
-            # Budowanie nagłówka CSV
             headers = ["Test name", "xSampleId", "xSelected"] + [
                 f"questionId_{i + 1},sampleId_{i + 1}" for i in range(len(all_questions))
-            ]
+            ] + ["Feedback"]
             csv_content = ",".join(headers) + "\n"
 
-            # Budowanie wierszy CSV
             for result in result_dict["results"]:
                 row = [result_dict["test_type"], result.x_sample_id, result.x_selected]
                 question_to_sample = {sel.question_id: sel.sample_id for sel in result.selections}
 
-                # Uzupełnianie wartości: zawsze wpisujemy `question_id`, ale `sampleId` może być `Null`
                 for question in all_questions:
                     sample = question_to_sample.get(question, "Null")
                     row.extend([question, sample])
 
+                row.append(getattr(result, "feedback", "") or "")
                 csv_content += ",".join(row) + "\n"
 
             return csv_content
-
 
         case "MUSHRA":
             assert all(isinstance(result, PqTestMUSHRAResult) for result in result_dict["results"]), \
@@ -474,7 +460,8 @@ def prepare_csv_result(session: Session, result_dict: dict):
 
             headers = (["TestName", "ReferenceFile", "ReferenceScore"]
                        + [f"AnchorSampleID_{i+1},AnchorScore_{i+1}"for i in range(len(all_anchors))]
-                       + [f"SampleId_{i+1},SampleScore_{i+1}" for i in range(len(all_samples))])
+                       + [f"SampleId_{i+1},SampleScore_{i+1}" for i in range(len(all_samples))]
+                       + ["Feedback"])
             csv_content = ",".join(headers) + "\n"
             for result in result_dict["results"]:
                 row = [result_dict["test_type"], result_dict["reference_file"], result.reference_score]
@@ -482,6 +469,7 @@ def prepare_csv_result(session: Session, result_dict: dict):
                     row.extend([anchor.sample_id, anchor.score])
                 for sample in result.samples_scores:
                     row.extend([sample.sample_id, sample.score])
+                row.append(getattr(result, "feedback", "") or "")
                 csv_content += ",".join(map(str, row)) + "\n"
 
             return csv_content
@@ -496,15 +484,15 @@ def prepare_csv_result(session: Session, result_dict: dict):
                 for axis in result.axis_results
                 for sample in axis.sample_ratings
             })
-            headers = ["TestName", "AxisId"] + [f"SampleId_{i+1},SampleScore_{i+1}" for i in range(len(all_samples))]
+            headers = ["TestName", "AxisId"] + [f"SampleId_{i+1},SampleScore_{i+1}" for i in range(len(all_samples))] + ["Feedback"]
             csv_content = ",".join(headers) + "\n"
             for result in result_dict["results"]:
                 for axis in result.axis_results:
                     row = [result_dict["test_type"], axis.axis_id]
                     for sample in axis.sample_ratings:
                         row.extend([sample.sample_id, sample.rating])
+                    row.append(getattr(result, "feedback", "") or "")
                     csv_content += ",".join(map(str, row)) + "\n"
-
             return csv_content
 
     return

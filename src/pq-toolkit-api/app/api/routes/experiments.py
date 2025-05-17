@@ -167,9 +167,7 @@ def get_results(session: SessionDep, experiment_name: str):
 
 
 @router.post("/{experiment_name}/results", response_model=PqTestResultsList)
-async def upload_results(
-    session: SessionDep, experiment_name: str, result_json: Request
-):
+async def upload_results(session: SessionDep, experiment_name: str, result_json: Request):
     res = await result_json.json()
     return crud.add_experiment_result(session, experiment_name, res)
 
