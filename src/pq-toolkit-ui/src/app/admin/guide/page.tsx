@@ -6,8 +6,23 @@ import { userFetch } from '@/lib/utils/fetchers';
 import Loading from '@/app/loading';
 import useSWR from 'swr';
 import LoginPage from '@/lib/components/login/login-page';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Guide = (): JSX.Element => {
+  const router = useRouter();
+  const { data: userData, isLoading } = useSWR<UserData>('/api/v1/auth/user', userFetch);
+  const isLoggedIn = !!userData?.is_active;
+
+  useEffect(() => {
+    if (!isLoading && !isLoggedIn) {
+      router.replace('/');
+    }
+  }, [isLoggedIn, isLoading, router]);
+
+  if (isLoading) return <Loading />;
+  if (!isLoggedIn) return null;
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-stone-900 text-black dark:text-neutral-200">
       <Header />

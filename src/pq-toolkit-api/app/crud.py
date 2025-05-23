@@ -399,7 +399,7 @@ def prepare_csv_result(session: Session, result_dict: dict):
                 for selection in result.selections
             })
 
-            headers = ["Test name"] + [f"questionId_{i + 1},sampleId_{i + 1}" for i in range(len(all_questions))] + ["Feedback"]
+            headers = ["Test type"] + [f"question {i + 1},sample {i + 1}" for i in range(len(all_questions))] + ["Feedback"]
             csv_content = ",".join(headers) + "\n"
 
             for result in result_dict["results"]:
@@ -425,8 +425,8 @@ def prepare_csv_result(session: Session, result_dict: dict):
                 for selection in result.selections
             })
 
-            headers = ["Test name", "xSampleId", "xSelected"] + [
-                f"questionId_{i + 1},sampleId_{i + 1}" for i in range(len(all_questions))
+            headers = ["Test type", "xSample", "xSelected"] + [
+                f"question {i + 1},sample {i + 1}" for i in range(len(all_questions))
             ] + ["Feedback"]
             csv_content = ",".join(headers) + "\n"
 
@@ -458,9 +458,9 @@ def prepare_csv_result(session: Session, result_dict: dict):
                 for sample in result.samples_scores
             })
 
-            headers = (["TestName", "ReferenceFile", "ReferenceScore"]
-                       + [f"AnchorSampleID_{i+1},AnchorScore_{i+1}"for i in range(len(all_anchors))]
-                       + [f"SampleId_{i+1},SampleScore_{i+1}" for i in range(len(all_samples))]
+            headers = (["Test type", "ReferenceFile", "ReferenceScore"]
+                       + [f"AnchorSample {i+1},AnchorScore {i+1}"for i in range(len(all_anchors))]
+                       + [f"Sample {i+1},SampleScore {i+1}" for i in range(len(all_samples))]
                        + ["Feedback"])
             csv_content = ",".join(headers) + "\n"
             for result in result_dict["results"]:
@@ -484,7 +484,7 @@ def prepare_csv_result(session: Session, result_dict: dict):
                 for axis in result.axis_results
                 for sample in axis.sample_ratings
             })
-            headers = ["TestName", "AxisId"] + [f"SampleId_{i+1},SampleScore_{i+1}" for i in range(len(all_samples))] + ["Feedback"]
+            headers = ["Test type", "Axis"] + [f"Sample {i+1},SampleScore {i+1}" for i in range(len(all_samples))] + ["Feedback"]
             csv_content = ",".join(headers) + "\n"
             for result in result_dict["results"]:
                 for axis in result.axis_results:
@@ -536,7 +536,7 @@ def generate_pdf_for_test(session: Session, experiment, results, test_number: in
                 for result in results_dict["results"]
                 for selection in result.selections
             })
-            headers = ["Test name"] + [f"questionId_{i + 1}" for i in range(len(all_questions))] + [f"sampleId_{i + 1}" for i in range(len(all_questions))] + ["Feedback"]
+            headers = ["Test type"] + [f"Question {i + 1}" for i in range(len(all_questions))] + [f"Sample {i + 1}" for i in range(len(all_questions))] + ["Feedback"]
             rows = []
             for result in results_dict["results"]:
                 row = [str(results_dict["test_type"])]
@@ -553,7 +553,7 @@ def generate_pdf_for_test(session: Session, experiment, results, test_number: in
                 for result in results_dict["results"]
                 for selection in result.selections
             })
-            headers = ["Test name", "xSampleId", "xSelected"] + [f"questionId_{i + 1}" for i in range(len(all_questions))] + [f"sampleId_{i + 1}" for i in range(len(all_questions))] + ["Feedback"]
+            headers = ["Test type", "xSample", "xSelected"] + [f"Question {i + 1}" for i in range(len(all_questions))] + [f"Sample {i + 1}" for i in range(len(all_questions))] + ["Feedback"]
             rows = []
             for result in results_dict["results"]:
                 row = [str(results_dict["test_type"]), result.x_sample_id, result.x_selected]
@@ -575,11 +575,11 @@ def generate_pdf_for_test(session: Session, experiment, results, test_number: in
                 for result in results_dict["results"]
                 for sample in result.samples_scores
             })
-            headers = ["TestName", "ReferenceFile", "ReferenceScore"]
+            headers = ["Test type", "Ref File", "Ref Score"]
             for i in range(len(all_anchors)):
-                headers += [f"AnchorSampleID_{i+1}", f"AnchorScore_{i+1}"]
+                headers += [f"AnchorSample {i+1}", f"AnchScore {i+1}"]
             for i in range(len(all_samples)):
-                headers += [f"SampleId_{i+1}", f"SampleScore_{i+1}"]
+                headers += [f"Sample {i+1}", f"S Score {i+1}"]
             headers += ["Feedback"]
             rows = []
             for result in results_dict["results"]:
@@ -597,9 +597,9 @@ def generate_pdf_for_test(session: Session, experiment, results, test_number: in
                 for axis in result.axis_results
                 for sample in axis.sample_ratings
             })
-            headers = ["TestName", "AxisId"]
+            headers = ["Test type", "Axis"]
             for i in range(len(all_samples)):
-                headers += [f"SampleId_{i+1}", f"SampleScore_{i+1}"]
+                headers += [f"Sample {i+1}", f"S Score {i+1}"]
             headers += ["Feedback"]
             rows = []
             for result in results_dict["results"]:
@@ -620,12 +620,182 @@ def generate_pdf_for_test(session: Session, experiment, results, test_number: in
     col_width = 190 / len(headers) if headers else 40
     pdf.set_fill_color(200, 220, 255)
     for header in headers:
-        pdf.cell(col_width, 10, header, border=1, fill=True)
-    pdf.ln()
+        pdf.cell(col_width, 8, header, border=1, align='C', fill=True)
+    pdf.ln(8)
     pdf.set_fill_color(255, 255, 255)
     for row in rows:
+        # Najpierw policz ile linii zajmie każda komórka
+        cell_lines = []
         for cell in row:
-            pdf.cell(col_width, 10, str(cell), border=1)
-        pdf.ln()
+            text = str(cell)
+            # Szacowanie liczby linii (uwzględnia podziały na \n)
+            lines = 0
+            for part in text.split('\n'):
+                lines += max(1, int(pdf.get_string_width(part) / col_width) + 1)
+            cell_lines.append(lines)
+        max_lines = max(cell_lines)
+        row_height = max_lines * 8
+        y_start = pdf.get_y()
+        x_start = pdf.get_x()
+        # Rysuj każdą komórkę, synchronizując wysokość
+        for i, cell in enumerate(row):
+            x = x_start + i * col_width
+            y = y_start
+            text = str(cell)
+            # multi_cell do zawijania tekstu, border tylko z lewej i prawej, potem ręcznie dolna linia
+            pdf.set_xy(x, y)
+            pdf.multi_cell(col_width, 8, text, border='LR', align='L')
+            # Jeśli komórka ma mniej linii niż max_lines, dorysuj puste miejsce
+            cell_height = cell_lines[i] * 8
+            if cell_height < row_height:
+                pdf.set_xy(x, y + cell_height)
+                pdf.cell(col_width, row_height - cell_height, '', border='LR')
+        # Rysuj dolną linię dla całego wiersza
+        pdf.set_xy(x_start, y_start + row_height)
+        pdf.cell(col_width * len(row), 0, '', border='T')
+        pdf.set_xy(x_start, y_start + row_height)
+    return pdf.output(dest='S').encode('latin1')
+
+
+def generate_pdf_for_experiment(session, experiment, experiment_name, results) -> bytes:
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    for idx, test in enumerate(experiment.tests):
+        test_number = idx + 1
+        test_results = []
+        for r in results:
+            result_dict = dict([r])
+            for k, v in result_dict.items():
+                for test_result in v:
+                    if hasattr(test_result, 'test_number') and test_result.test_number == test_number:
+                        test_results.append(test_result)
+        if not test_results:
+            continue
+        match test.type:
+            case "AB":
+                all_questions = sorted({
+                    selection.question_id
+                    for result in test_results
+                    for selection in result.selections
+                })
+                headers = ["Test type"] + [f"Question {i + 1}" for i in range(len(all_questions))] + [f"Sample {i + 1}" for i in range(len(all_questions))] + ["Feedback"]
+                rows = []
+                for result in test_results:
+                    row = [str(test.type)]
+                    question_to_sample = {sel.question_id: sel.sample_id for sel in result.selections}
+                    for question in all_questions:
+                        row.append(question)
+                    for question in all_questions:
+                        row.append(question_to_sample.get(question, "Null"))
+                    row.append(getattr(result, "feedback", "") or "")
+                    rows.append(row)
+            case "ABX":
+                all_questions = sorted({
+                    selection.question_id
+                    for result in test_results
+                    for selection in result.selections
+                })
+                headers = ["Test type", "xSample", "xSelected"] + [f"question {i + 1}" for i in range(len(all_questions))] + [f"sample {i + 1}" for i in range(len(all_questions))] + ["Feedback"]
+                rows = []
+                for result in test_results:
+                    row = [str(test.type), result.x_sample_id, result.x_selected]
+                    question_to_sample = {sel.question_id: sel.sample_id for sel in result.selections}
+                    for question in all_questions:
+                        row.append(question)
+                    for question in all_questions:
+                        row.append(question_to_sample.get(question, "Null"))
+                    row.append(getattr(result, "feedback", "") or "")
+                    rows.append(row)
+            case "MUSHRA":
+                all_anchors = sorted({
+                    anchor.sample_id
+                    for result in test_results
+                    for anchor in result.anchors_scores
+                })
+                all_samples = sorted({
+                    sample.sample_id
+                    for result in test_results
+                    for sample in result.samples_scores
+                })
+                headers = ["Test Type", "Ref. File", "Ref. Score"]
+                for i in range(len(all_anchors)):
+                    headers += [f"Anch S {i+1}", f"Anch. Sc. {i+1}"]
+                for i in range(len(all_samples)):
+                    headers += [f"Sample {i+1}", f"Samp. Sc. {i+1}"]
+                headers += ["Feedback"]
+                rows = []
+                for result in test_results:
+                    row = [str(test.type), getattr(test, 'reference', getattr(test, 'reference_file', '')), result.reference_score if hasattr(result, 'reference_score') else ""]
+                    for anchor in getattr(result, 'anchors_scores', []):
+                        row.extend([anchor.sample_id, anchor.score])
+                    for sample in getattr(result, 'samples_scores', []):
+                        row.extend([sample.sample_id, sample.score])
+                    row.append(getattr(result, "feedback", "") or "")
+                    rows.append(row)
+            case "APE":
+                all_samples = sorted({
+                    sample.sample_id
+                    for result in test_results
+                    for axis in result.axis_results
+                    for sample in axis.sample_ratings
+                })
+                headers = ["Test type", "Axis"]
+                for i in range(len(all_samples)):
+                    headers += [f"Sample {i+1}", f"Samp Score {i+1}"]
+                headers += ["Feedback"]
+                rows = []
+                for result in test_results:
+                    for axis in result.axis_results:
+                        row = [str(test.type), axis.axis_id]
+                        for sample in axis.sample_ratings:
+                            row.extend([sample.sample_id, sample.rating])
+                        row.append(getattr(result, "feedback", "") or "")
+                        rows.append(row)
+            case _:
+                headers = []
+                rows = []
+        pdf.add_page()
+        pdf.set_font("Arial", size=9)
+        pdf.cell(200, 10, txt=f"Experiment: {experiment_name} - Test {test_number} ({test.type})", ln=True, align='C')
+        col_width = 190 / len(headers) if headers else 40
+        pdf.set_fill_color(200, 220, 255)
+        y_start = pdf.get_y()
+        # Nagłówki
+        for header in headers:
+            pdf.cell(col_width, 8, header, border=1, align='C', fill=True)
+        pdf.ln(8)
+        pdf.set_fill_color(255, 255, 255)
+        # Wiersze
+        for row in rows:
+            # Najpierw policz ile linii zajmie każda komórka
+            cell_lines = []
+            for cell in row:
+                text = str(cell)
+                # Szacowanie liczby linii (uwzględnia podziały na \n)
+                lines = 0
+                for part in text.split('\n'):
+                    lines += max(1, int(pdf.get_string_width(part) / col_width) + 1)
+                cell_lines.append(lines)
+            max_lines = max(cell_lines)
+            row_height = max_lines * 10
+            y_start = pdf.get_y()
+            x_start = pdf.get_x()
+            # Rysuj każdą komórkę, synchronizując wysokość
+            for i, cell in enumerate(row):
+                x = x_start + i * col_width
+                y = y_start
+                text = str(cell)
+                # multi_cell do zawijania tekstu, border tylko z lewej i prawej, potem ręcznie dolna linia
+                pdf.set_xy(x, y)
+                pdf.multi_cell(col_width, 8, text, border='LR', align='L')
+                # Jeśli komórka ma mniej linii niż max_lines, dorysuj puste miejsce
+                cell_height = cell_lines[i] * 8
+                if cell_height < row_height:
+                    pdf.set_xy(x, y + cell_height)
+                    pdf.cell(col_width, row_height - cell_height, '', border='LR')
+            # Rysuj dolną linię dla całego wiersza
+            pdf.set_xy(x_start, y_start + row_height)
+            pdf.cell(col_width * len(row), 0, '', border='T')
+            pdf.set_xy(x_start, y_start + row_height)
     return pdf.output(dest='S').encode('latin1')
 

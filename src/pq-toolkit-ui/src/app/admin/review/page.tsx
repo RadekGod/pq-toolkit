@@ -141,14 +141,19 @@ const AdminExperimentsListWidget = ({
                             className="ml-4 relative"
                             onMouseEnter={() => setDownloadMenuIdx(idx)}
                             onMouseLeave={() => setDownloadMenuIdx(null)}
+                            style={{display: 'inline-block'}}
                         >
                             <button
                                 className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-2 rounded whitespace-nowrap"
+                                style={{marginBottom: 0, borderBottomLeftRadius: 0, borderBottomRightRadius: 0}}
                             >
                                 Download results
                             </button>
                             {downloadMenuIdx === idx && (
-                                <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg z-50">
+                                <div
+                                    className="absolute right-0 w-32 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-b shadow-lg z-50"
+                                    style={{marginTop: 0, top: '100%'}}
+                                >
                                     <button
                                         className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
                                         onClick={() => downloadAll(name, 'csv')}
