@@ -109,7 +109,7 @@ def download_results_csv(session: SessionDep, experiment_name: str, test_number:
     output.write(csv_data)
     output.seek(0)
     response = StreamingResponse(
-        iter([output.getvalue()]),  # Zwracamy zawartość CSV jako strumień
+        iter([output.getvalue()]),
         media_type="text/csv",
     )
     response.headers["Content-Disposition"] = f"attachment; filename={experiment.name}_test_{test_number}_{test_type}.csv"
@@ -134,12 +134,9 @@ def download_results_csv_all(session: SessionDep, experiment_name: str):
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         for csv_file in csv_files:
-            zip_file.write(csv_file, arcname=os.path.basename(csv_file))  # Dodanie pliku CSV do ZIP
+            zip_file.write(csv_file, arcname=os.path.basename(csv_file))
 
-    # Ustawienie pozycji wskaźnika na początek pliku ZIP
     zip_buffer.seek(0)
-
-    # Sprzątanie: usunięcie plików tymczasowych
     for csv_file in csv_files:
         os.remove(csv_file)
     os.rmdir(temp_dir)

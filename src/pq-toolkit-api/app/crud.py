@@ -504,7 +504,6 @@ def generate_csv_for_test(session: Session, experiment, results, test_number: in
     }
     if results_dict["test_type"] == "MUSHRA":
         results_dict["reference_file"] = experiment.tests[test_number - 1].reference.asset_path
-    # Convert results to CSV format
 
     for r in results:
         result_dict = dict([r])
@@ -529,7 +528,6 @@ def generate_pdf_for_experiment(session, experiment, experiment_name, results) -
                         test_results.append(test_result)
         if not test_results:
             continue
-        # Przygotuj dane poziomo: nagłówki w pierwszej kolumnie, wyniki w kolejnych kolumnach
         match test.type:
             case "AB":
                 all_questions = sorted({
@@ -614,20 +612,12 @@ def generate_pdf_for_experiment(session, experiment, experiment_name, results) -
             case _:
                 headers = []
                 data_matrix = []
-        # Transponuj dane: nagłówki w pierwszej kolumnie, kolejne kolumny to wyniki
         table = [[header] + [row[i] if i < len(row) else "" for row in data_matrix] for i, header in enumerate(headers)]
-        # Oblicz szerokości kolumn na podstawie najdłuższego tekstu w kolumnie
         col_widths = []
         for idx, col in enumerate(table):
             max_len = max(len(str(cell)) for cell in col)
-            if test.type == "MUSHRA" and idx > 0:
-                # Kolumny z odpowiedziami w MUSHRA węższe niż poprzednio
-                col_widths.append(max(30, min(80, max_len * 2.5)))
-            elif test.type == "APE":
-                # W APE kolumny szerokie, by nie nachodziły na siebie
-                col_widths.append(max(40, min(100, max_len * 4)))
-            else:
-                col_widths.append(max(20, min(60, max_len * 3)))
+            col_width = max(10, min(100, int(max_len * 2.5 + 4)))
+            col_widths.append(col_width)
         pdf.add_page()
         pdf.set_font("Arial", size=9)
         pdf.cell(0, 10, txt=f"Experiment: {experiment_name} - Test {test_number} ({test.type})", ln=True, align='C')
@@ -635,9 +625,8 @@ def generate_pdf_for_experiment(session, experiment, experiment_name, results) -
         for row_idx, row in enumerate(table):
             for col_idx, cell in enumerate(row):
                 if col_idx == 0:
-                    # Kolumna z nagłówkami - błękitne tło i pogrubiona czcionka
                     pdf.set_fill_color(173, 216, 230)
-                    pdf.set_font("Arial", 'B', 9)  # zawsze pogrubiona czcionka dla kolumny nagłówkowej
+                    pdf.set_font("Arial", 'B', 9)
                     pdf.cell(col_widths[col_idx], 8, str(cell), border=1, align='C' if row_idx == 0 else 'L', fill=True)
                 else:
                     pdf.set_fill_color(255, 255, 255)
