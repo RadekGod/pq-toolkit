@@ -115,18 +115,6 @@ def download_results_csv(session: SessionDep, experiment_name: str, test_number:
     response.headers["Content-Disposition"] = f"attachment; filename={experiment.name}_test_{test_number}_{test_type}.csv"
     return response
 
-@router.get("/{experiment_name}/{test_number}/download_pdf", response_class=Response)
-def download_results_pdf(session: SessionDep, experiment_name: str, test_number: int, test_type: str):
-    experiment = crud.get_experiment_by_name(session, experiment_name)
-    results = crud.get_experiment_tests_results(session, experiment_name)
-    pdf_data = crud.generate_pdf_for_test(session, experiment, results, test_number)
-    response = StreamingResponse(
-        iter([pdf_data]),
-        media_type="application/pdf",
-    )
-    response.headers["Content-Disposition"] = f"attachment; filename={experiment.name}_test_{test_number}_{test_type}.pdf"
-    return response
-
 @router.get("/{experiment_name}/download_csv", response_class=Response)
 def download_results_csv_all(session: SessionDep, experiment_name: str):
 
