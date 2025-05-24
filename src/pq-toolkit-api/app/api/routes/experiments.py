@@ -152,7 +152,7 @@ def download_results_pdf_all(session: SessionDep, experiment_name: str):
     experiment = crud.get_experiment_by_name(session, experiment_name)
     results = crud.get_experiment_tests_results(session, experiment_name)
     pdf_data = crud.generate_pdf_for_experiment(session, experiment, experiment_name, results)
-    headers = {"Content-Disposition": f"attachment; filename={experiment.name}_all_tests.pdf"}
+    headers = {"Content-Disposition": f"attachment; filename={experiment_name}_all_tests.pdf"}
     return StreamingResponse(iter([pdf_data]), media_type="application/pdf", headers=headers)
 
 
