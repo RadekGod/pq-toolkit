@@ -584,7 +584,8 @@ def generate_pdf_for_experiment(session, experiment, experiment_name, results) -
                 headers += ["Feedback"]
                 data_matrix = []
                 for result in test_results:
-                    row = [str(test.type), getattr(test, 'reference', getattr(test, 'reference_file', '')), result.reference_score if hasattr(result, 'reference_score') else ""]
+                    reference_file = getattr(getattr(test, 'reference', None), 'asset_path', None)
+                    row = [str(test.type), reference_file, result.reference_score if hasattr(result, 'reference_score') else ""]
                     for anchor in getattr(result, 'anchors_scores', []):
                         row.extend([anchor.sample_id, anchor.score])
                     for sample in getattr(result, 'samples_scores', []):
@@ -634,12 +635,15 @@ def generate_pdf_for_experiment(session, experiment, experiment_name, results) -
         for row_idx, row in enumerate(table):
             for col_idx, cell in enumerate(row):
                 if col_idx == 0:
-                    # Kolumna z nagłówkami - błękitne tło
+                    # Kolumna z nagłówkami - błękitne tło i pogrubiona czcionka
                     pdf.set_fill_color(173, 216, 230)
+                    pdf.set_font("Arial", 'B', 9)  # zawsze pogrubiona czcionka dla kolumny nagłówkowej
                     pdf.cell(col_widths[col_idx], 8, str(cell), border=1, align='C' if row_idx == 0 else 'L', fill=True)
                 else:
                     pdf.set_fill_color(255, 255, 255)
+                    pdf.set_font("Arial", '', 9)
                     pdf.cell(col_widths[col_idx], 8, str(cell), border=1, align='C' if row_idx == 0 else 'L', fill=True)
             pdf.ln(8)
+
     return pdf.output(dest='S').encode('latin1')
 
