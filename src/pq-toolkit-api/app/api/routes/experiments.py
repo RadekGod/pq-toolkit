@@ -109,7 +109,7 @@ def download_results_csv(session: SessionDep, experiment_name: str, test_number:
     output.write(csv_data)
     output.seek(0)
     response = StreamingResponse(
-        iter([output.getvalue()]),  # Zwracamy zawartość CSV jako strumień
+        iter([output.getvalue()]),
         media_type="text/csv",
     )
     response.headers["Content-Disposition"] = f"attachment; filename={experiment.name}_test_{test_number}_{test_type}.csv"
@@ -134,18 +134,23 @@ def download_results_csv_all(session: SessionDep, experiment_name: str):
     zip_buffer = BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         for csv_file in csv_files:
-            zip_file.write(csv_file, arcname=os.path.basename(csv_file))  # Dodanie pliku CSV do ZIP
+            zip_file.write(csv_file, arcname=os.path.basename(csv_file))
 
-    # Ustawienie pozycji wskaźnika na początek pliku ZIP
     zip_buffer.seek(0)
-
-    # Sprzątanie: usunięcie plików tymczasowych
     for csv_file in csv_files:
         os.remove(csv_file)
     os.rmdir(temp_dir)
 
     headers = {"Content-Disposition": f"attachment; filename={experiment.name}.zip"}
     return StreamingResponse(zip_buffer, media_type="application/zip", headers=headers)
+
+@router.get("/{experiment_name}/download_pdf", response_class=Response)
+def download_results_pdf_all(session: SessionDep, experiment_name: str):
+    experiment = crud.get_experiment_by_name(session, experiment_name)
+    results = crud.get_experiment_tests_results(session, experiment_name)
+    pdf_data = crud.generate_pdf_for_experiment(session, experiment, experiment_name, results)
+    headers = {"Content-Disposition": f"attachment; filename={experiment_name}_all_tests.pdf"}
+    return StreamingResponse(iter([pdf_data]), media_type="application/pdf", headers=headers)
 
 
 @router.delete(
@@ -167,9 +172,7 @@ def get_results(session: SessionDep, experiment_name: str):
 
 
 @router.post("/{experiment_name}/results", response_model=PqTestResultsList)
-async def upload_results(
-    session: SessionDep, experiment_name: str, result_json: Request
-):
+async def upload_results(session: SessionDep, experiment_name: str, result_json: Request):
     res = await result_json.json()
     return crud.add_experiment_result(session, experiment_name, res)
 

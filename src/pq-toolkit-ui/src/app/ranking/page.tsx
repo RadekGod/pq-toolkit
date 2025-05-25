@@ -276,12 +276,12 @@ const RankingPage = (): JSX.Element => {
             <Header />
             <div className="absolute -top-10 lg:-top-32 -right-6 max-w-full w-72 md:w-80 lg:w-96 h-72 md:h-80 lg:h-96 bg-none md:bg-gradient-to-r from-purple-500 to-violet-600 dark:from-purple-600 dark:to-violet-600 rounded-full mix-blend-multiply dark:mix-blend-color-dodge filter blur-xl opacity-60 dark:opacity-40 animate-blob animation-delay-8000 pointer-events-none"></div>
             <header className="py-12 text-center">
-                <h1 className="text-5xl font-bold text-gray-900 dark:text-white">Sound Samples Ranking</h1>
+                <h1 className="text-5xl font-bold text-gray-900 dark:text-white">Audio Samples Ranking</h1>
             </header>
             <main className="flex flex-col items-center">
                 <div className="w-full max-w-5xl px-6">
                     <div className="flex items-center justify-between mb-10 relative">
-                        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">List of Sound Samples</h2>
+                        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">List of Audio Samples</h2>
                         <div className="flex space-x-4">
                             {isLoggedIn && (
                                 <button

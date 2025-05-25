@@ -153,7 +153,7 @@ class PqTestBaseResult(BaseModel):
         alias="testNumber", validation_alias=AliasChoices("testNumber", "test_number")
     )
     type: Optional[str] = None
-
+    feedback: Optional[str] = None
 
 class PqSelection(BaseModel):
     question_id: str = Field(

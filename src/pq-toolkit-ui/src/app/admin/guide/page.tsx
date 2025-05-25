@@ -6,8 +6,23 @@ import { userFetch } from '@/lib/utils/fetchers';
 import Loading from '@/app/loading';
 import useSWR from 'swr';
 import LoginPage from '@/lib/components/login/login-page';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Guide = (): JSX.Element => {
+  const router = useRouter();
+  const { data: userData, isLoading } = useSWR<UserData>('/api/v1/auth/user', userFetch);
+  const isLoggedIn = !!userData?.is_active;
+
+  useEffect(() => {
+    if (!isLoading && !isLoggedIn) {
+      router.replace('/');
+    }
+  }, [isLoggedIn, isLoading, router]);
+
+  if (isLoading) return <Loading />;
+  if (!isLoggedIn) return null;
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-stone-900 text-black dark:text-neutral-200">
       <Header />
@@ -226,66 +241,92 @@ const Guide = (): JSX.Element => {
           </ul>
 
           <h3 className="text-lg font-semibold mt-6">
-            Viewing Experiment Results
+            Experiment Results
           </h3>
           <p>
-            Results from conducted experiments can be reviewed in the Experiment
-            review tab, accessible via the dropdown menu in the top-right
-            corner.
+            To access the results of conducted experiments, go to <em>Experiment review </em>
+            tab (accessible via the dropdown menu in the top-right corner).
           </p>
-
-          <div className="flex justify-center my-4">
+          <div className="flex flex-col items-center my-1">
             <img
-              src="/guide_photos/Experiment_review.png"
+              src="/guide_photos/Download-All.png"
               alt="Adding an experiment"
-              className="my-4"
+              className="my-1 rounded-md shadow-lg"
             />
+            <p className="text-sm text-center mt-1 italic text-gray-500 dark:text-gray-400">
+              Figure 6: The interface for accessing experiment results.
+            </p>
           </div>
+          <p>
+            Clicking the 
+            <span 
+              className="inline-flex items-center justify-center px-2 py-[0.1rem] bg-violet-500 text-white rounded-md font-semibold ml-1 mr-1 text-sm leading-tight align-middle">
+              Download results
+            </span>
+            button allows you to retrieve the results of the entire experiment, 
+            including all associated tests. Both <em>csv</em> and <em>pdf </em> 
+            formats are available.
 
-          <div className="flex justify-center my-4">
+            If you wish to preview the results of individual tests within an experiment, open the corresponding experiment tile. 
+            Inside, you'll find charts presenting statistics for each test, along with the option to download a <em>csv </em> 
+            file containing results specific to that test.
+          </p>
+          <div className="flex flex-col items-center my-1">
             <img
-              src="/guide_photos/Experiment_review_chart.png"
+              src="/guide_photos/Download-Mushra.png"
               alt="Adding an experiment"
-              className="my-4"
+              className="my-1 rounded-md shadow-lg"
             />
+            <p className="text-sm text-center mt-1 italic text-gray-500 dark:text-gray-400">
+              Figure 7: Interface for reviewing individual test results.
+            </p>
           </div>
 
           <h3 className="text-lg font-semibold mt-6">
-            Quick Experiment Management
+            Experiment Management
           </h3>
           <p>
-            The application includes a tab for quickly reviewing experiment
-            specifications and deleting them from the database if needed.
+            The <em>Experiment Management</em> tab allows you to preview an experiment's 
+            setup without entering the modification menu. From this view, it is also possible to permanently delete the experiment.
           </p>
-
-          <div className="flex justify-center my-4">
+          <div className="flex flex-col items-center my-1">
             <img
-              src="/guide_photos/Experiment_management.png"
+              src="/guide_photos/Manage-All.png"
               alt="Adding an experiment"
-              className="my-4"
+              className="my-1 rounded-md shadow-lg"
             />
+            <p className="text-sm text-center mt-1 italic text-gray-500 dark:text-gray-400">
+              Figure 8: Interface for experiment management.
+            </p>
           </div>
-
-          <div className="flex justify-center my-4">
+          <div className="flex flex-col items-center my-1">
             <img
-              src="/guide_photos/Experiment_management_details.png"
+              src="/guide_photos/Manage-In.png"
               alt="Adding an experiment"
-              className="my-4"
+              className="my-1 rounded-md shadow-lg"
             />
+            <p className="text-sm text-center mt-1 italic text-gray-500 dark:text-gray-400">
+              Figure 9: Interface for previewing experiment configuration and test list.
+            </p>
           </div>
 
           <h3 className="text-lg font-semibold mt-6">Rating Audio Samples</h3>
           <p>
-            A dedicated tab allows administrators to rate samples uploaded to
-            the system on a scale from 1 to 5. Samples can also be previewed.
+           Each user has access to the <em>Sample Ranking</em> section. From this view, users can rate each sample uploaded by the administrator on a scale from 1 to 5. 
+           The results can also be sorted by highest or lowest ratings. 
+           
+           For administrators, this section additionally allows uploading new samples and removing currently stored ones.
           </p>
 
-          <div className="flex justify-center my-4">
+          <div className="flex flex-col items-center my-1">
             <img
-              src="/guide_photos/Sample_ranking.png"
+              src="/guide_photos/Ranking.png"
               alt="Adding an experiment"
-              className="my-4"
+              className="my-1 rounded-md shadow-lg"
             />
+            <p className="text-sm text-center mt-1 italic text-gray-500 dark:text-gray-400">
+              Figure 10: Interface for samples rating.
+            </p>
           </div>
         </div>
       </div>
