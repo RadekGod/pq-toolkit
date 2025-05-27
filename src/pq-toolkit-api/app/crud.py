@@ -612,27 +612,23 @@ def generate_pdf_for_experiment(session, experiment, experiment_name, results) -
             case _:
                 headers = []
                 data_matrix = []
-        table = [[header] + [row[i] if i < len(row) else "" for row in data_matrix] for i, header in enumerate(headers)]
-        col_widths = []
-        for idx, col in enumerate(table):
-            max_len = max(len(str(cell)) for cell in col)
-            col_width = max(10, min(100, int(max_len * 2.5 + 4)))
-            col_widths.append(col_width)
-        pdf.add_page()
-        pdf.set_font("Arial", size=9)
-        pdf.cell(0, 10, txt=f"Experiment: {experiment_name} - Test {test_number} ({test.type})", ln=True, align='C')
-        pdf.ln(2)
-        for row_idx, row in enumerate(table):
-            for col_idx, cell in enumerate(row):
-                if col_idx == 0:
-                    pdf.set_fill_color(173, 216, 230)
-                    pdf.set_font("Arial", 'B', 9)
-                    pdf.cell(col_widths[col_idx], 8, str(cell), border=1, align='C' if row_idx == 0 else 'L', fill=True)
-                else:
-                    pdf.set_fill_color(255, 255, 255)
-                    pdf.set_font("Arial", '', 9)
-                    pdf.cell(col_widths[col_idx], 8, str(cell), border=1, align='C' if row_idx == 0 else 'L', fill=True)
-            pdf.ln(8)
+        for row in data_matrix:
+            pdf.add_page()
+            pdf.set_font("Arial", size=9)
+            pdf.cell(0, 10, txt=f"Experiment: {experiment_name} - Test {test_number} ({test.type})", ln=True, align='C')
+            pdf.ln(2)
+
+            for i, header in enumerate(headers):
+                value = row[i] if i < len(row) else ""
+                pdf.set_fill_color(173, 216, 230)
+                pdf.set_font("Arial", 'B', 9)
+                pdf.cell(50, 8, str(header), border=1, align='L', fill=True)
+
+                pdf.set_fill_color(255, 255, 255)
+                pdf.set_font("Arial", '', 9)
+                pdf.cell(130, 8, str(value), border=1, align='L', fill=True)
+
+                pdf.ln(8)
 
     return pdf.output(dest='S').encode('latin1')
 
