@@ -18,8 +18,7 @@ The following section summarizes the main development work and improvements comp
 
 ## DevOps & Repo Management
 - Implemented **CI/CD workflow**
-- Cleaned up **deployment scripts**
-- Performed **codebase refactoring**
+- Performed **code refactoring**
 - Organized project structure and simplified developer onboarding
 
 ##  Documentation & Guidance
